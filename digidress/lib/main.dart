@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'avatar.dart'; // Import the AvatarPage
 
 void main() {
   runApp(const MyApp());
@@ -68,6 +69,14 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  // Navigate to AvatarPage when the button is pressed
+  void _navigateToAvatarPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AvatarPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -111,6 +120,11 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 20), // Add some spacing
+            ElevatedButton(
+              onPressed: _navigateToAvatarPage, // Call the method to navigate
+              child: const Text('Go to Avatar Page'),
             ),
           ],
         ),
