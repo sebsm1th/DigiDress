@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+
+
 
 class AvatarPage extends StatefulWidget {
   @override
@@ -8,6 +12,47 @@ class AvatarPage extends StatefulWidget {
 class _AvatarPageState extends State<AvatarPage> {
   // Add variables here to hold any state information if needed
   // For example: int _selectedOutfit = 0;
+  File? _imageFile;
+  final ImagePicker _picker = ImagePicker();
+
+  void _pickImage(ImageSource source) async {
+    final pickedFile = await _picker.pickImage(source: source);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
+  }
+
+  void _showPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.photo_library),
+                title: Text('Photo Library'),
+                onTap: () {
+                  _pickImage(ImageSource.gallery);
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_camera),
+                title: Text('Camera'),
+                onTap: () {
+                  _pickImage(ImageSource.camera);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +140,7 @@ class _AvatarPageState extends State<AvatarPage> {
           
           // Bottom Navigation Bar
           BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.home),
@@ -121,6 +167,10 @@ class _AvatarPageState extends State<AvatarPage> {
             onTap: (index) {
               // Handle navigation
             },
+            backgroundColor: Colors.black, // Set the background color to black
+            selectedItemColor: Colors.white, // Set the selected item color to white
+            unselectedItemColor: Colors.white70, // Set the unselected item color to white70
+            showUnselectedLabels: true, // Show labels for unselected items
           ),
         ],
       ),
