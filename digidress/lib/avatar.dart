@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-
-
+import 'homepage.dart';
 
 class AvatarPage extends StatefulWidget {
   @override
@@ -165,7 +164,15 @@ class _AvatarPageState extends State<AvatarPage> {
             ],
             currentIndex: 2, // Index of the "Wardrobe" screen
             onTap: (index) {
-              // Handle navigation
+              if (index == 0) {
+                // Navigate to HomePage when Home button is tapped
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                );
+              } else {
+                // Handle other tabs
+              }
             },
             backgroundColor: Colors.black, // Set the background color to black
             selectedItemColor: Colors.white, // Set the selected item color to white

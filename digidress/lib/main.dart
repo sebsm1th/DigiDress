@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'avatar.dart'; // Import the AvatarPage
+import 'avatar.dart';
+import 'homepage.dart';
 
 void main() {
   runApp(const MyApp());
