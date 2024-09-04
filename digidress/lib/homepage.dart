@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'bottomnav.dart'; // Import the BottomNavBar widget
-import 'avatar.dart';
-import 'profile.dart';
-import 'search.dart';
-import 'chat.dart';
+import 'bottomnav.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -11,7 +7,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _currentIndex = 0; // Current index for BottomNavBar
+  int _currentIndex = 0; 
   List<bool> likedPosts = List.filled(10, false); 
   List<List<String>> comments = List.generate(10, (_) => []); 
 

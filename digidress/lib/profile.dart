@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login_page.dart'; // Ensure you have this import to navigate back to the login screen
-import 'bottomnav.dart'; // Import BottomNavBar
+import 'login_page.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
