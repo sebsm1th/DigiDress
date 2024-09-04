@@ -16,7 +16,8 @@ class ProfilePage extends StatelessWidget {
               'Profile Page Placeholder',
               style: TextStyle(fontSize: 24),
             ),
-            SizedBox(height: 20), // Add some spacing between the text and the button
+            SizedBox(height: 20),
+
             ElevatedButton(
               onPressed: () {
                 // Implement logout logic here
