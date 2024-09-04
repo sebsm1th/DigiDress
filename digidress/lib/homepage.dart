@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'avatar.dart'; // Ensure you import the AvatarPage
 
 class HomePage extends StatefulWidget {
   @override
@@ -6,16 +7,18 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List<bool> likedPosts = List.filled(10, false); // Track like status for 10 posts
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Digidress'),
         centerTitle: true,
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.white,
       ),
       body: ListView.builder(
-        itemCount: 10, // display 10 posts
+        itemCount: 10, // display 10 posts as an example
         itemBuilder: (context, index) {
           return _buildPostItem(index);
         },
@@ -46,7 +49,15 @@ class _HomePageState extends State<HomePage> {
         ],
         currentIndex: 0, // Index of the "Home" screen
         onTap: (index) {
-          // Handle navigation
+          if (index == 2) {
+            // Navigate to Avatar Page when Wardrobe button is tapped
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AvatarPage()),
+            );
+          } else {
+            // Handle other tabs
+          }
         },
         backgroundColor: Colors.black, 
         selectedItemColor: Colors.white,
@@ -73,14 +84,19 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           SizedBox(height: 10),
-          Image.asset('assets/post${index + 1}.jpg'), // Display the correct post image
+          Image.asset('assets/post${index + 1}.jpg'), // Display post image
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               IconButton(
-                icon: Icon(Icons.favorite_border),
+                icon: Icon(
+                  likedPosts[index] ? Icons.favorite : Icons.favorite_border,
+                  color: likedPosts[index] ? Colors.red : null,
+                ),
                 onPressed: () {
-                  // Handle like
+                  setState(() {
+                    likedPosts[index] = !likedPosts[index];
+                  });
                 },
               ),
               IconButton(
