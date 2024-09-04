@@ -1,3 +1,4 @@
+import 'package:digidress/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -175,7 +176,11 @@ class _AvatarPageState extends State<AvatarPage> {
                   context,
                   MaterialPageRoute(builder: (context) => HomePage()),
                 );
-              } else {
+              } else if (index == 4) {
+
+                Navigator.push(context
+                , MaterialPageRoute(builder: (context) => ProfilePage()),
+                );
                 // Handle other tabs
               }
             },

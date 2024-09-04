@@ -1,5 +1,7 @@
+import 'package:digidress/profile.dart';
 import 'package:flutter/material.dart';
 import 'avatar.dart'; 
+import 'profile.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -56,8 +58,12 @@ class _HomePageState extends State<HomePage> {
               context,
               MaterialPageRoute(builder: (context) => AvatarPage()),
             );
-          } else {
-            // Handle other tabs
+          } else if (index == 4) {
+            Navigator.push(
+              context,
+            MaterialPageRoute(builder: (context) => ProfilePage())
+            );
+          
           }
         },
         backgroundColor: Colors.black, 

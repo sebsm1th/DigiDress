@@ -4,8 +4,11 @@ import 'homepage.dart'; // Import the HomePage
 class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
+      
       appBar: AppBar(
+        automaticallyImplyLeading: false, // Disable the back button
         title: Text('Login'),
       ),
       body: Center(
