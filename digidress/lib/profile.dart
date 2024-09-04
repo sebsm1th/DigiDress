@@ -24,38 +24,28 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: Text('Profile'),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Profile Page Placeholder',
-                    style: TextStyle(fontSize: 24),
-                  ),
-                  SizedBox(height: 20), // Add some spacing between the text and the button
-                  ElevatedButton(
-                    onPressed: () {
-                      // Implement logout logic here
-                      // For now, just navigate back to the login screen
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginPage()),
-                      );
-                    },
-                    child: Text('Logout'),
-                  ),
-                ],
-              ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Profile Page Placeholder',
+              style: TextStyle(fontSize: 24),
             ),
-          ),
-          BottomNavBar(
-            currentIndex: _currentIndex,
-            onTap: _onNavBarTap,
-          ),
-        ],
+            SizedBox(height: 20), // Add some spacing between the text and the button
+            ElevatedButton(
+              onPressed: () {
+                // Implement logout logic here
+                // For now, just navigate back to the login screen
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                );
+              },
+              child: Text('Logout'),
+            ),
+          ],
+        ),
       ),
     );
   }
