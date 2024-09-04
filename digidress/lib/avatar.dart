@@ -1,9 +1,12 @@
-import 'package:digidress/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'homepage.dart';
 import 'posting.dart';
+import 'search.dart';
+import 'chat.dart';
+import 'profile.dart';
+import 'bottomnav.dart'; // Import BottomNavBar
 
 class AvatarPage extends StatefulWidget {
   @override
@@ -11,10 +14,9 @@ class AvatarPage extends StatefulWidget {
 }
 
 class _AvatarPageState extends State<AvatarPage> {
-  // Add variables here to hold any state information if needed
-  // For example: int _selectedOutfit = 0;
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
+  int _currentIndex = 2; // Current index for "Wardrobe" screen
 
   void _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
@@ -55,24 +57,31 @@ class _AvatarPageState extends State<AvatarPage> {
     );
   }
 
+  void _onNavBarTap(int index) {
+    // You might not need this function since navigation is handled inside BottomNavBar
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-      automaticallyImplyLeading: false, // Disable the back button
-      title: Text('Digidress - Avatar'),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.camera_alt),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => Posting()), // Navigate to Posting page
-            );
-          },
-        ),
-      ],
-    ),
+        automaticallyImplyLeading: false,
+        title: Text('Digidress - Avatar'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.camera_alt),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Posting()),
+              );
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           // Weather Info Row
@@ -144,50 +153,13 @@ class _AvatarPageState extends State<AvatarPage> {
           ),
           
           // Bottom Navigation Bar
-          BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.search),
-                label: 'Search',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.checkroom),
-                label: 'Wardrobe',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.message),
-                label: 'Chat',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: 'Profile',
-              ),
-            ],
-            currentIndex: 2, // Index of the "Wardrobe" screen
+          BottomNavBar(
+            currentIndex: _currentIndex,
             onTap: (index) {
-              if (index == 0) {
-                // Navigate to HomePage when Home button is tapped
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomePage()),
-                );
-              } else if (index == 4) {
-
-                Navigator.push(context
-                , MaterialPageRoute(builder: (context) => ProfilePage()),
-                );
-                // Handle other tabs
-              }
+              setState(() {
+                _currentIndex = index;
+              });
             },
-            backgroundColor: Colors.black, // Set the background color to black
-            selectedItemColor: Colors.white, // Set the selected item color to white
-            unselectedItemColor: Colors.white70, // Set the unselected item color to white70
-            showUnselectedLabels: true, // Show labels for unselected items
           ),
         ],
       ),

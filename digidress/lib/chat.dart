@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'bottomnav.dart'; // Import the BottomNavBar widget
+import 'bottomnav.dart';
 
 class ChatPage extends StatefulWidget {
   @override
@@ -7,7 +7,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  int _currentIndex = 3; // Set the current index for the ChatPage
+  int _currentIndex = 3;
 
   void _onNavBarTap(int index) {
     setState(() {
@@ -23,34 +23,7 @@ class _ChatPageState extends State<ChatPage> {
         centerTitle: true,
         backgroundColor: Colors.black,
       ),
-      body: ListView(
-        padding: EdgeInsets.all(8.0),
-        children: <Widget>[
-          ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.blue,
-              child: Text('A'),
-            ),
-            title: Text('Alice'),
-            subtitle: Text('Hey, how are you?'),
-            onTap: () {
-              // Handle tap on chat item
-            },
-          ),
-          ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.green,
-              child: Text('B'),
-            ),
-            title: Text('Bob'),
-            subtitle: Text('Are we still on for today?'),
-            onTap: () {
-              // Handle tap on chat item
-            },
-          ),
-          // Add more ListTiles for other chat items
-        ],
-      ),
+      body: Center(child: Text('Chat Page Content')),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: _onNavBarTap,
