@@ -19,6 +19,7 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text('Search Page'),
         centerTitle: true,
         backgroundColor: Colors.black,
