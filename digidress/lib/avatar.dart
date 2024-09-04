@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'homepage.dart';
+import 'posting.dart';
 
 class AvatarPage extends StatefulWidget {
   @override
@@ -57,16 +58,19 @@ class _AvatarPageState extends State<AvatarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Digidress - Avatar'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.camera_alt),
-            onPressed: () {
-              // Add action for post button
-            },
-          ),
-        ],
-      ),
+      title: Text('Digidress - Avatar'),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.camera_alt),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Posting()), // Navigate to Posting page
+            );
+          },
+        ),
+      ],
+    ),
       body: Column(
         children: [
           // Weather Info Row
