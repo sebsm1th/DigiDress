@@ -58,6 +58,7 @@ class _AvatarPageState extends State<AvatarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+      automaticallyImplyLeading: false, // Disable the back button
       title: Text('Digidress - Avatar'),
       actions: [
         IconButton(
