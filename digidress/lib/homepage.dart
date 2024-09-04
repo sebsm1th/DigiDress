@@ -1,6 +1,6 @@
 import 'package:digidress/profile.dart';
 import 'package:flutter/material.dart';
-import 'avatar.dart'; // Ensure you import the AvatarPage
+import 'avatar.dart'; 
 import 'profile.dart';
 
 class HomePage extends StatefulWidget {
@@ -9,19 +9,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<bool> likedPosts = List.filled(10, false); // Track like status for 10 posts
+  List<bool> likedPosts = List.filled(10, false); 
+  List<List<String>> comments = List.generate(10, (_) => []); 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Disable the back button
         title: Text('Digidress'),
         centerTitle: true,
         backgroundColor: Colors.white,
       ),
       body: ListView.builder(
-        itemCount: 10, // display 10 posts as an example
+        itemCount: 10, 
         itemBuilder: (context, index) {
           return _buildPostItem(index);
         },
@@ -109,7 +109,7 @@ class _HomePageState extends State<HomePage> {
               IconButton(
                 icon: Icon(Icons.comment),
                 onPressed: () {
-                  // Handle comment
+                  _showCommentDialog(context, index);
                 },
               ),
               IconButton(
@@ -126,10 +126,51 @@ class _HomePageState extends State<HomePage> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text('View all comments'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var comment in comments[index]) 
+                  Text(comment, style: TextStyle(color: Colors.grey[700])),
+                Text('View all comments'),
+              ],
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  void _showCommentDialog(BuildContext context, int index) {
+    TextEditingController commentController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add a comment'),
+          content: TextField(
+            controller: commentController,
+            decoration: InputDecoration(hintText: "Type your comment here"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Post'),
+              onPressed: () {
+                setState(() {
+                  comments[index].add(commentController.text);
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
