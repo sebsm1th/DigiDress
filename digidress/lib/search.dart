@@ -22,7 +22,7 @@ class _SearchPageState extends State<SearchPage> {
         automaticallyImplyLeading: false,
         title: Text('Search Page'),
         centerTitle: true,
-        backgroundColor: Colors.black,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       body: Center(child: Text('Search Page Content')),
       bottomNavigationBar: BottomNavBar(
