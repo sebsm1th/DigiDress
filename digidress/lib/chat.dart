@@ -22,12 +22,13 @@ class _ChatPageState extends State<ChatPage> {
         automaticallyImplyLeading: false,
         title: Text('Chat Page'),
         centerTitle: true,
-        backgroundColor: Colors.black,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       body: Center(child: Text('Chat Page Content')),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: _onNavBarTap,
+        
       ),
     );
   }

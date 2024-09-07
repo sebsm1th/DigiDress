@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // Disable the back button
         title: Text('Digidress'),
         centerTitle: true,
         backgroundColor: Colors.white,
