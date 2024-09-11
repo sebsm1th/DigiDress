@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "916879133384",
+    "project_id": "digidress-sdp-firebase-55245",
+    "storage_bucket": "digidress-sdp-firebase-55245.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:916879133384:android:696d2d6ea9ef05352eb3fd",
+        "android_client_info": {
+          "package_name": "digidress.firebase.sdp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBorA8cYjlr45nYP3LVHlwfHJ4JTsxizIY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:916879133384:android:aec996fea85fb45d2eb3fd",
+        "android_client_info": {
+          "package_name": "digidress.sdp.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBorA8cYjlr45nYP3LVHlwfHJ4JTsxizIY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
