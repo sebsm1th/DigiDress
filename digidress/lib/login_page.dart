@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'homepage.dart'; // Import the HomePage
+import 'createaccountpage.dart';
 
 final TextEditingController usernameController = TextEditingController();
 final TextEditingController passwordController = TextEditingController();
@@ -48,10 +49,13 @@ class LoginPage extends StatelessWidget {
                     },
                     child: Text('Login'),
                   ),
-                  ElevatedButton(
+                                    ElevatedButton(
                     onPressed: () {
-                      // Print to console when "Create Account" is pressed
-                      print("Create Account button pressed");
+                      // Navigate to CreateAccountPage when "Create Account" is pressed
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => CreateAccountPage()),
+                      );
                     },
                     child: Text('Create Account'),
                   ),
