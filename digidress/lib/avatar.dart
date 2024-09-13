@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'homepage.dart';
 import 'posting.dart';
-import 'search.dart';
-import 'chat.dart';
-import 'profile.dart';
-import 'bottomnav.dart'; // Import BottomNavBar
+import 'bottomnav.dart';
 
 class AvatarPage extends StatefulWidget {
   @override
@@ -58,7 +54,6 @@ class _AvatarPageState extends State<AvatarPage> {
   }
 
   void _onNavBarTap(int index) {
-    // You might not need this function since navigation is handled inside BottomNavBar
     setState(() {
       _currentIndex = index;
     });

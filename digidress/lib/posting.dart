@@ -51,12 +51,13 @@ class _PostingState extends State<Posting> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Create a Post'),
-      ),
-      body: Column(
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text('Create a Post'),
+    ),
+    body: Center(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           _imageFile == null
@@ -76,6 +77,8 @@ class _PostingState extends State<Posting> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
