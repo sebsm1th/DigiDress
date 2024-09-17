@@ -71,6 +71,8 @@ class CreateAccountPage extends StatelessWidget {
                           backgroundColor: Colors.green,
                         ),
                       );
+                      // Navigate back to login page after successfull account creation
+                      Navigator.pop(context);
                     } on FirebaseAuthException catch (e) {
                       String errorMessage;
                       if (e.code == 'weak-password') {
