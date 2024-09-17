@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CreateAccountPage extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
@@ -22,7 +23,7 @@ class CreateAccountPage extends StatelessWidget {
                 controller: usernameController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Username',
+                  labelText: 'Email',
                 ),
               ),
               SizedBox(height: 20), // Spacing between fields
@@ -51,15 +52,56 @@ class CreateAccountPage extends StatelessWidget {
 
               // Create Account Button
               ElevatedButton(
-                onPressed: () {
-                  String username = usernameController.text;
+                onPressed: () async {
+                  print('Create Account button pressed');
+                  String email = usernameController.text;
                   String password = passwordController.text;
                   String confirmPassword = confirmPasswordController.text;
 
                   if (password == confirmPassword) {
-                    print('Account successfully created for username: $username');
+                    try {
+                      final credential = await FirebaseAuth.instance
+                          .createUserWithEmailAndPassword(
+                        email: email,
+                        password: password,
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Account successfully created for email: $email'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    } on FirebaseAuthException catch (e) {
+                      String errorMessage;
+                      if (e.code == 'weak-password') {
+                        errorMessage = 'The password provided is too weak.';
+                      } else if (e.code == 'email-already-in-use') {
+                        errorMessage = 'The account already exists for that email.';
+                      } else {
+                        errorMessage = 'An error occurred: ${e.message}';
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(errorMessage),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error creating account: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
                   } else {
-                    print('Passwords do not match!');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Passwords do not match!'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
                   }
                 },
                 child: Text('Create Account'),

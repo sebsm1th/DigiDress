@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'digidress-sdp-firebase-55245.appspot.com',
     measurementId: 'G-THCC1K96VX',
   );
+
 }
