@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'homepage.dart'; // Import the HomePage
 import 'createaccountpage.dart';
 
@@ -23,7 +24,7 @@ class LoginPage extends StatelessWidget {
                 controller: usernameController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Username',
+                  labelText: 'Email',
                 ),
               ),
               SizedBox(height: 20), // Add spacing between text fields
@@ -40,18 +41,53 @@ class LoginPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
-                    onPressed: () {
-                      // Navigate to HomePage when login is pressed
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomePage()),
-                      );
+                    onPressed: () async {
+                      print('Login button pressed');
+                      String email = usernameController.text;
+                      String password = passwordController.text;
+
+                      try {
+                        UserCredential userCredential = await FirebaseAuth.instance
+                            .signInWithEmailAndPassword(
+                          email: email,
+                          password: password,
+                        );
+                        if (context.mounted) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => HomePage()),
+                          );
+                        }
+                      } on FirebaseAuthException catch (e) {
+                        String errorMessage;
+                        if (e.code == 'user-not-found') {
+                          errorMessage = 'No user found for that email.';
+                        } else if (e.code == 'wrong-password') {
+                          errorMessage = 'Wrong password provided for that user.';
+                        } else {
+                          errorMessage = 'An error occurred: ${e.message}';
+                        }
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(errorMessage),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error logging in: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
                     },
                     child: Text('Login'),
                   ),
-                                    ElevatedButton(
+                  ElevatedButton(
                     onPressed: () {
-                      // Navigate to CreateAccountPage when "Create Account" is pressed
+                      print('Create Account button pressed');
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => CreateAccountPage()),
