@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'bottomnav.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
+import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
+
 
 class HomePage extends StatefulWidget {
   @override
@@ -12,6 +14,29 @@ class _HomePageState extends State<HomePage> {
   List<bool> likedPosts = List.filled(10, false); 
   List<int> likeCounts = List.filled(10, 0); // List to keep track of like counts
   List<List<String>> comments = List.generate(10, (_) => []); 
+  String username = ''; // Variable to store the username
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUsername(); // Fetch the username when the page initializes
+  }
+
+  // Fetch the username from Firestore using the user's UID
+  Future<void> _fetchUsername() async {
+    try {
+      String uid = FirebaseAuth.instance.currentUser!.uid;
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      setState(() {
+        username = userDoc['username'];
+      });
+    } catch (e) {
+      print('Error fetching username: $e');
+      setState(() {
+        username = 'Error';
+      });
+    }
+  }
 
   void _onNavBarTap(int index) {
     setState(() {
@@ -56,7 +81,7 @@ class _HomePageState extends State<HomePage> {
                   backgroundImage: AssetImage('assets/avatar.jpg'), // Replace with user's avatar image
                 ),
                 SizedBox(width: 10),
-                Text('Username', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(username, style: TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
             SizedBox(height: 10),
