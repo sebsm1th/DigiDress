@@ -66,7 +66,7 @@ class LoginPage extends StatelessWidget {
                         } else if (e.code == 'wrong-password') {
                           errorMessage = 'Wrong password provided for that user.';
                         } else {
-                          errorMessage = 'Account With that email does not exit, please create and account.';
+                          errorMessage = 'Account with that email does not exist, please create an account.';
                         }
 
                         ScaffoldMessenger.of(context).showSnackBar(
