@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore for database
+import 'package:firebase_auth/firebase_auth.dart';  // Firebase Authentication
 import 'bottomnav.dart';
+import 'userservice.dart'; // Make sure this import is correct
 
 class SearchPage extends StatefulWidget {
   @override
@@ -7,28 +10,68 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  int _currentIndex = 1;
+  TextEditingController searchController = TextEditingController();
+  List<DocumentSnapshot> searchResults = [];
+  bool isLoading = false;
+  final userService = UserService(); // Corrected the instance creation
 
-  void _onNavBarTap(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
+  // Method to search users based on the input
+  void searchUsers(String query) async {
+    if (query.isNotEmpty) {
+      setState(() {
+        isLoading = true;
+      });
+
+      List<DocumentSnapshot> users = await userService.searchUsers(query); // Use the service method
+      setState(() {
+        searchResults = users;
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        searchResults = [];
+      });
+    }
+  }
+
+  // Get current user ID
+  Future<String?> getCurrentUserID() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    return user?.uid;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text('Search Page'),
-        centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        title: TextField(
+          controller: searchController,
+          decoration: InputDecoration(hintText: 'Search Users'),
+          onChanged: (query) {
+            searchUsers(query);
+          },
+        ),
       ),
-      body: Center(child: Text('Search Page Content')),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _onNavBarTap,
-      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: searchResults.length,
+              itemBuilder: (context, index) {
+                var user = searchResults[index];
+                return ListTile(
+                  title: Text(user['username']),
+                  trailing: ElevatedButton(
+                    child: Text('Add Friend'),
+                    onPressed: () async {
+                      String? currentUserID = await getCurrentUserID();
+                      if (currentUserID != null) {
+                        userService.sendFriendRequest(currentUserID, user.id);
+                      }
+                    },
+                  ),
+                );
+              },
+            ),
     );
   }
 }
