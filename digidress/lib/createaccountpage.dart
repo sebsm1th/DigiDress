@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 
 class CreateAccountPage extends StatelessWidget {
-  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController(); // Controller for username
+  
+  // Initialize Firestore instance
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +26,16 @@ class CreateAccountPage extends StatelessWidget {
               // Username field
               TextField(
                 controller: usernameController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Username',
+                ),
+              ),
+              SizedBox(height: 20), // Spacing between fields
+
+              // Email field
+              TextField(
+                controller: emailController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Email',
@@ -54,24 +69,30 @@ class CreateAccountPage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   print('Create Account button pressed');
-                  String email = usernameController.text;
+                  String username = usernameController.text; // Get username
+                  String email = emailController.text;
                   String password = passwordController.text;
                   String confirmPassword = confirmPasswordController.text;
 
                   if (password == confirmPassword) {
                     try {
+                      // Create user with email and password
                       final credential = await FirebaseAuth.instance
                           .createUserWithEmailAndPassword(
                         email: email,
                         password: password,
                       );
+                      
+                      // Save user data to Firestore
+                      await _createUserInFirestore(credential.user!.uid, email, username); // Pass username
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text('Account successfully created for email: $email'),
                           backgroundColor: Colors.green,
                         ),
                       );
-                      // Navigate back to login page after successfull account creation
+                      // Navigate back to login page after successful account creation
                       Navigator.pop(context);
                     } on FirebaseAuthException catch (e) {
                       String errorMessage;
@@ -114,4 +135,18 @@ class CreateAccountPage extends StatelessWidget {
       ),
     );
   }
+
+  // Function to create user in Firestore
+Future<void> _createUserInFirestore(String uid, String email, String username) async {
+  try {
+    await _firestore.collection('users').doc(uid).set({
+      'username': username,
+      'email': email,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  } catch (e) {
+    print('Error creating user in Firestore: $e');
+    rethrow; // Rethrow the error to be handled by the caller
+  }
+}
 }

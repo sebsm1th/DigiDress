@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart'; // Update with the correct path
-import 'login_page.dart'; // Ensure this import is correct
-import 'avatar.dart'; // Ensure this import is correct
+import 'firebase_options.dart';
+import 'login_page.dart'; 
+import 'avatar.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
