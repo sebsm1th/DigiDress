@@ -73,6 +73,7 @@ class CreateAccountPage extends StatelessWidget {
                   String email = emailController.text;
                   String password = passwordController.text;
                   String confirmPassword = confirmPasswordController.text;
+                  String description = '';
 
                   if (password == confirmPassword) {
                     try {
@@ -84,7 +85,7 @@ class CreateAccountPage extends StatelessWidget {
                       );
                       
                       // Save user data to Firestore
-                      await _createUserInFirestore(credential.user!.uid, email, username); // Pass username
+                      await _createUserInFirestore(credential.user!.uid, email, username, description); // Pass username
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -137,13 +138,14 @@ class CreateAccountPage extends StatelessWidget {
   }
 
   // Function to create user in Firestore
-Future<void> _createUserInFirestore(String uid, String email, String username) async {
+Future<void> _createUserInFirestore(String uid, String email, String username, String description) async {
   try {
     await _firestore.collection('users').doc(uid).set({
       'username': username,
       'email': email,
       'createdAt': FieldValue.serverTimestamp(),
       'friendsCount': 0, // Initialize friendsCount to 0
+      'description': description,
     });
   } catch (e) {
     print('Error creating user in Firestore: $e');
