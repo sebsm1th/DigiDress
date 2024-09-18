@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'homepage.dart'; // Import the HomePage
 import 'createaccountpage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 
 final TextEditingController usernameController = TextEditingController();
 final TextEditingController passwordController = TextEditingController();
