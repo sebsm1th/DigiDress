@@ -143,6 +143,7 @@ Future<void> _createUserInFirestore(String uid, String email, String username) a
       'username': username,
       'email': email,
       'createdAt': FieldValue.serverTimestamp(),
+      'friendsCount': 0, // Initialize friendsCount to 0
     });
   } catch (e) {
     print('Error creating user in Firestore: $e');
