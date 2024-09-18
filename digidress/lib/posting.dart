@@ -138,48 +138,56 @@ class _PostingState extends State<Posting> {
     );
   }
 
-  Future<void> _uploadImage() async {
-  if (_imageFile == null) return;
-
-  try {
-    // Get the current user ID
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    // Create a reference to the Firebase Storage location
-    Reference storageRef = FirebaseStorage.instance
-        .ref()
-        .child('posts/${user.uid}/${DateTime.now().millisecondsSinceEpoch}.jpg');
-
-    // Upload the image
-    UploadTask uploadTask = storageRef.putFile(_imageFile!);
-    TaskSnapshot snapshot = await uploadTask;
-    String downloadUrl = await snapshot.ref.getDownloadURL();
-
-    // Save the post data in Firestore
-    await FirebaseFirestore.instance.collection('posts').add({
-      'userId': user.uid,
-      'imageUrl': downloadUrl,
-      'createdAt': FieldValue.serverTimestamp(),
+  void _discardImage() {
+    setState(() {
+      _imageFile = null; // Reset the image file
     });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Post created successfully!'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  } catch (e) {
-    print('Error uploading image: $e'); // Log the error
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Failed to create post.'),
-        backgroundColor: Colors.red,
-      ),
-    );
   }
-}
 
+  Future<void> _uploadImage() async {
+    if (_imageFile == null) return;
+
+    try {
+      // Get the current user ID
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      // Create a reference to the Firebase Storage location
+      Reference storageRef = FirebaseStorage.instance
+          .ref()
+          .child('posts/${user.uid}/${DateTime.now().millisecondsSinceEpoch}.jpg');
+
+      // Upload the image
+      UploadTask uploadTask = storageRef.putFile(_imageFile!);
+      TaskSnapshot snapshot = await uploadTask;
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+
+      // Save the post data in Firestore
+      await FirebaseFirestore.instance.collection('posts').add({
+        'userId': user.uid,
+        'imageUrl': downloadUrl,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Post created successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Reset image after successful upload
+      _discardImage();
+    } catch (e) {
+      print('Error uploading image: $e'); // Log the error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to create post.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -187,27 +195,42 @@ class _PostingState extends State<Posting> {
       appBar: AppBar(
         title: Text('Create a Post'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            _imageFile == null
-                ? Text('No image selected.')
-                : Image.file(_imageFile!),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => _showPicker(context),
-              child: Text('Select Image'),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _imageFile == null
+                    ? Text('No image selected.')
+                    : Image.file(
+                        _imageFile!,
+                        height: 200, // Adjust height as needed
+                        fit: BoxFit.cover,
+                      ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => _showPicker(context),
+                  child: Text('Select Image'),
+                ),
+                SizedBox(height: 20),
+                if (_imageFile != null) ...[
+                  ElevatedButton(
+                    onPressed: _discardImage,
+                    child: Text('Discard Image'),
+                  ),
+                  SizedBox(height: 20),
+                ],
+                ElevatedButton(
+                  onPressed: _uploadImage,
+                  child: Text('Post'),
+                ),
+              ],
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _uploadImage,
-              child: Text('Post'),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
-
