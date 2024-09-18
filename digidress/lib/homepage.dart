@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'bottomnav.dart';
+import 'activity.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
 
@@ -46,26 +47,38 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false, // Disable the back button
-        title: const Text('Digidress'),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-      ),
-      body: ListView.builder(
-        itemCount: 10,
-        itemBuilder: (context, index) {
-          return _buildPostItem(index);
-        },
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _onNavBarTap,
-      ),
-    );
-  }
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      automaticallyImplyLeading: false, // Disable the back button
+      title: const Text('Digidress'),
+      centerTitle: true,
+      backgroundColor: Colors.white,
+      actions: [
+        IconButton(
+          icon: Icon(Icons.notifications, color: Colors.black),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ActivityPage()),
+            );
+          },
+        ),
+        const SizedBox(width: 10), // Add spacing if needed
+      ],
+    ),
+    body: ListView.builder(
+      itemCount: 10,
+      itemBuilder: (context, index) {
+        return _buildPostItem(index);
+      },
+    ),
+    bottomNavigationBar: BottomNavBar(
+      currentIndex: _currentIndex,
+      onTap: _onNavBarTap,
+    ),
+  );
+}
 
   Widget _buildPostItem(int index) {
     return Padding(
