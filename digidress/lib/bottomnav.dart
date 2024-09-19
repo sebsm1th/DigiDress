@@ -67,7 +67,7 @@ class BottomNavBar extends StatelessWidget {
           case 4:
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const ProfilePage()),
+              MaterialPageRoute(builder: (context) => ProfilePage()),
             );
             break;
           default:
