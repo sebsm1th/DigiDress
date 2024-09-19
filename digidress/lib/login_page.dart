@@ -93,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
                           } else if (e.code == 'wrong-password') {
                             errorMessage = 'Wrong password provided for that user.';
                           } else {
-                            errorMessage = 'Account with that email does not exist, please create an account.';
+                            errorMessage = 'Email or password is incorrect';
                           }
 
                           ScaffoldMessenger.of(context).showSnackBar(
