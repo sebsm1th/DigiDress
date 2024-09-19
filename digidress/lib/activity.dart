@@ -3,8 +3,27 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'userservice.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class ActivityPage extends StatelessWidget {
-  const ActivityPage({super.key});
+class ActivityPage extends StatefulWidget {
+  @override
+  _ActivityPageState createState() => _ActivityPageState();
+}
+
+class _ActivityPageState extends State<ActivityPage> {
+  int selectedIndex = 0; // To track which subpage is selected
+
+  // This method returns the content for the selected subpage
+  Widget getSubPageContent() {
+    switch (selectedIndex) {
+      case 0:
+        return LikesContent();
+      case 1:
+        return CommentsContent();
+      case 2:
+        return FriendRequestsContent(); // Updated with the FriendRequestsContent page
+      default:
+        return LikesContent();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
