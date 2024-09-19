@@ -9,7 +9,7 @@ class BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  BottomNavBar({required this.currentIndex, required this.onTap});
+  const BottomNavBar({super.key, required this.currentIndex, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -43,31 +43,31 @@ class BottomNavBar extends StatelessWidget {
           case 0:
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => HomePage()),
+              MaterialPageRoute(builder: (context) => const HomePage()),
             );
             break;
           case 1:
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => SearchPage()),
+              MaterialPageRoute(builder: (context) => const SearchPage()),
             );
             break;
           case 2:
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => AvatarPage()),
+              MaterialPageRoute(builder: (context) => const AvatarPage()),
             );
             break;
           case 3:
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ChatPage()),
+              MaterialPageRoute(builder: (context) => const ChatPage()),
             );
             break;
           case 4:
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ProfilePage()),
+              MaterialPageRoute(builder: (context) => const ProfilePage()),
             );
             break;
           default:

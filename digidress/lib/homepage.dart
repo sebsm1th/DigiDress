@@ -56,11 +56,11 @@ Widget build(BuildContext context) {
       backgroundColor: Colors.white,
       actions: [
         IconButton(
-          icon: Icon(Icons.notifications, color: Colors.black),
+          icon: const Icon(Icons.notifications, color: Colors.black),
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ActivityPage()),
+              MaterialPageRoute(builder: (context) => const ActivityPage()),
             );
           },
         ),

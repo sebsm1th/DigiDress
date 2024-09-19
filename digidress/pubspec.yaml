@@ -81,6 +81,8 @@ flutter:
     - assets/post8.jpg
     - assets/post9.jpg
     - assets/post10.jpg
+    - assets/logo1.png
+    - assets/logo2.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
