@@ -14,7 +14,7 @@ void main() async {
   } catch (e) {
     print('Error initializing Firebase: $e');
   }
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: LoginPage(), // Set the initial route to LoginPage
+      home: const LoginPage(), // Set the initial route to LoginPage
     );
   }
 }
@@ -53,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _navigateToAvatarPage() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AvatarPage()),
+      MaterialPageRoute(builder: (context) => const AvatarPage()),
     );
   }
 

@@ -11,11 +11,13 @@ class CreateAccountPage extends StatelessWidget {
   // Initialize Firestore instance
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  CreateAccountPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Account'),
+        title: const Text('Create Account'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -26,44 +28,44 @@ class CreateAccountPage extends StatelessWidget {
               // Username field
               TextField(
                 controller: usernameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Username',
                 ),
               ),
-              SizedBox(height: 20), // Spacing between fields
+              const SizedBox(height: 20), // Spacing between fields
 
               // Email field
               TextField(
                 controller: emailController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Email',
                 ),
               ),
-              SizedBox(height: 20), // Spacing between fields
+              const SizedBox(height: 20), // Spacing between fields
               
               // Password field
               TextField(
                 controller: passwordController,
                 obscureText: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Password',
                 ),
               ),
-              SizedBox(height: 20), // Spacing between fields
+              const SizedBox(height: 20), // Spacing between fields
 
               // Confirm Password field
               TextField(
                 controller: confirmPasswordController,
                 obscureText: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Confirm Password',
                 ),
               ),
-              SizedBox(height: 20), // Spacing between fields
+              const SizedBox(height: 20), // Spacing between fields
 
               // Create Account Button
               ElevatedButton(
@@ -121,14 +123,14 @@ class CreateAccountPage extends StatelessWidget {
                     }
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                         content: Text('Passwords do not match!'),
                         backgroundColor: Colors.red,
                       ),
                     );
                   }
                 },
-                child: Text('Create Account'),
+                child: const Text('Create Account'),
               ),
             ],
           ),

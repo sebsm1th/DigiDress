@@ -91,6 +91,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class Posting extends StatefulWidget {
+  const Posting({super.key});
+
   @override
   _PostingState createState() => _PostingState();
 }
@@ -116,16 +118,16 @@ class _PostingState extends State<Posting> {
           child: Wrap(
             children: <Widget>[
               ListTile(
-                leading: Icon(Icons.photo_library),
-                title: Text('Photo Library'),
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Photo Library'),
                 onTap: () {
                   _pickImage(ImageSource.gallery);
                   Navigator.of(context).pop();
                 },
               ),
               ListTile(
-                leading: Icon(Icons.photo_camera),
-                title: Text('Camera'),
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Camera'),
                 onTap: () {
                   _pickImage(ImageSource.camera);
                   Navigator.of(context).pop();
@@ -170,7 +172,7 @@ class _PostingState extends State<Posting> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Post created successfully!'),
           backgroundColor: Colors.green,
         ),
@@ -181,7 +183,7 @@ class _PostingState extends State<Posting> {
     } catch (e) {
       print('Error uploading image: $e'); // Log the error
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Failed to create post.'),
           backgroundColor: Colors.red,
         ),
@@ -193,7 +195,7 @@ class _PostingState extends State<Posting> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create a Post'),
+        title: const Text('Create a Post'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -203,28 +205,28 @@ class _PostingState extends State<Posting> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 _imageFile == null
-                    ? Text('No image selected.')
+                    ? const Text('No image selected.')
                     : Image.file(
                         _imageFile!,
                         height: 200, // Adjust height as needed
                         fit: BoxFit.cover,
                       ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () => _showPicker(context),
-                  child: Text('Select Image'),
+                  child: const Text('Select Image'),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 if (_imageFile != null) ...[
                   ElevatedButton(
                     onPressed: _discardImage,
-                    child: Text('Discard Image'),
+                    child: const Text('Discard Image'),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                 ],
                 ElevatedButton(
                   onPressed: _uploadImage,
-                  child: Text('Post'),
+                  child: const Text('Post'),
                 ),
               ],
             ),

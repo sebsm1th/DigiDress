@@ -5,6 +5,8 @@ import 'posting.dart';
 import 'bottomnav.dart';
 
 class AvatarPage extends StatefulWidget {
+  const AvatarPage({super.key});
+
   @override
   _AvatarPageState createState() => _AvatarPageState();
 }
@@ -31,16 +33,16 @@ class _AvatarPageState extends State<AvatarPage> {
           child: Wrap(
             children: <Widget>[
               ListTile(
-                leading: Icon(Icons.photo_library),
-                title: Text('Photo Library'),
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Photo Library'),
                 onTap: () {
                   _pickImage(ImageSource.gallery);
                   Navigator.of(context).pop();
                 },
               ),
               ListTile(
-                leading: Icon(Icons.photo_camera),
-                title: Text('Camera'),
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Camera'),
                 onTap: () {
                   _pickImage(ImageSource.camera);
                   Navigator.of(context).pop();
@@ -64,14 +66,14 @@ class _AvatarPageState extends State<AvatarPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('Digidress - Avatar'),
+        title: const Text('Digidress - Avatar'),
         actions: [
           IconButton(
-            icon: Icon(Icons.camera_alt),
+            icon: const Icon(Icons.camera_alt),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Posting()),
+                MaterialPageRoute(builder: (context) => const Posting()),
               );
             },
           ),
@@ -81,8 +83,8 @@ class _AvatarPageState extends State<AvatarPage> {
         children: [
           // Weather Info Row
           Container(
-            padding: EdgeInsets.all(16.0),
-            child: Row(
+            padding: const EdgeInsets.all(16.0),
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
@@ -123,7 +125,7 @@ class _AvatarPageState extends State<AvatarPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.arrow_back),
+                        icon: const Icon(Icons.arrow_back),
                         onPressed: () {
                           // Previous Outfit
                         },
@@ -132,10 +134,10 @@ class _AvatarPageState extends State<AvatarPage> {
                         onPressed: () {
                           // Generate Outfit
                         },
-                        child: Text('Generate Outfit'),
+                        child: const Text('Generate Outfit'),
                       ),
                       IconButton(
-                        icon: Icon(Icons.arrow_forward),
+                        icon: const Icon(Icons.arrow_forward),
                         onPressed: () {
                           // Next Outfit
                         },

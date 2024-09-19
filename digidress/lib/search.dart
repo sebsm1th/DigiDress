@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'bottomnav.dart';
 
 class SearchPage extends StatefulWidget {
+  const SearchPage({super.key});
+
   @override
   _SearchPageState createState() => _SearchPageState();
 }
@@ -20,11 +22,11 @@ class _SearchPageState extends State<SearchPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('Search Page'),
+        title: const Text('Search Page'),
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
-      body: Center(child: Text('Search Page Content')),
+      body: const Center(child: Text('Search Page Content')),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: _onNavBarTap,
