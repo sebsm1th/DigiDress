@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_page.dart';
 import 'bottomnav.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
-
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
   int _currentIndex = 4; // Index of the "Profile" screen
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-<<<<<<< ProfilePage
   // Function to fetch user profile data from Firestore
   Future<Map<String, dynamic>> _fetchUserProfile() async {
     User? user = _auth.currentUser;
@@ -43,8 +43,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // Function to handle navigation tap
-=======
->>>>>>> main
   void _onNavBarTap(int index) {
     if (index != _currentIndex) {
       setState(() {
@@ -55,19 +53,15 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-<<<<<<< ProfilePage
     User? user = _auth.currentUser;
     if (user == null) {
       return Center(child: Text('Please log in to view your profile.'));
     }
 
-=======
->>>>>>> main
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text('Profile'),
       ),
-<<<<<<< ProfilePage
       body: FutureBuilder<Map<String, dynamic>>(
         future: _fetchUserProfile(),
         builder: (context, snapshot) {
@@ -198,30 +192,6 @@ class _ProfilePageState extends State<ProfilePage> {
             );
           }
         },
-=======
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Profile Page Placeholder',
-              style: TextStyle(fontSize: 24),
-            ),
-            const SizedBox(height: 20), // Add some spacing between the text and the button
-            ElevatedButton(
-              onPressed: () {
-                // Implement logout logic here
-                // For now, just navigate back to the login screen
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                );
-              },
-              child: const Text('Logout'),
-            ),
-          ],
-        ),
->>>>>>> main
       ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
