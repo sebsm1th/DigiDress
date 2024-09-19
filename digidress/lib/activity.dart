@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'userservice.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'userservice.dart'; // Assuming this is the user service file we discussed earlier.
 
 class ActivityPage extends StatefulWidget {
   @override
@@ -124,29 +124,31 @@ class _FriendRequestsContentState extends State<FriendRequestsContent> {
   final userService = UserService();
   List<DocumentSnapshot> pendingRequests = [];
   bool isLoading = true;
+  String? currentUserID;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentUserID().then((_) => loadPendingRequests());
+  }
 
   // Get current user ID
-  Future<String?> getCurrentUserID() async {
+  Future<void> _getCurrentUserID() async {
     User? user = FirebaseAuth.instance.currentUser;
-    return user?.uid;
+    setState(() {
+      currentUserID = user?.uid;
+    });
   }
 
   // Load pending friend requests
   void loadPendingRequests() async {
-    String? currentUserID = await getCurrentUserID();
     if (currentUserID != null) {
-      List<DocumentSnapshot> requests = await userService.getPendingFriendRequests(currentUserID);
+      List<DocumentSnapshot> requests = await userService.getPendingFriendRequests(currentUserID!);
       setState(() {
         pendingRequests = requests;
         isLoading = false;
       });
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    loadPendingRequests();
   }
 
   @override
@@ -181,20 +183,24 @@ class _FriendRequestsContentState extends State<FriendRequestsContent> {
                             children: [
                               ElevatedButton(
                                 onPressed: () async {
-                                  await userService.updateFriendRequestStatus(request.id, 'accepted');
-                                  loadPendingRequests(); // Reload pending requests
+                                  if (currentUserID != null) {
+                                    await userService.updateFriendRequestStatus(request.id, 'accepted', currentUserID!, fromUserID);
+                                    loadPendingRequests(); // Reload pending requests
+                                  }
                                 },
                                 child: Text('Accept'),
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),  // Use backgroundColor instead of primary
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
                               ),
                               SizedBox(width: 10),
                               ElevatedButton(
                                 onPressed: () async {
-                                  await userService.updateFriendRequestStatus(request.id, 'rejected');
-                                  loadPendingRequests(); // Reload pending requests
+                                  if (currentUserID != null) {
+                                    await userService.updateFriendRequestStatus(request.id, 'rejected', currentUserID!, fromUserID);
+                                    loadPendingRequests(); // Reload pending requests
+                                  }
                                 },
                                 child: Text('Reject'),
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),  // Use backgroundColor instead of primary
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                               ),
                             ],
                           ),

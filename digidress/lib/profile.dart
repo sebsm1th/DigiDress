@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_page.dart';
 import 'bottomnav.dart';
+import 'userservice.dart';  // Import UserService
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -12,6 +13,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   int _currentIndex = 4; // Index of the "Profile" screen
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final UserService _userService = UserService(); // Instantiate UserService
 
   // Function to fetch user profile data from Firestore
   Future<Map<String, dynamic>> _fetchUserProfile() async {
@@ -19,27 +21,16 @@ class _ProfilePageState extends State<ProfilePage> {
     if (user != null) {
       try {
         DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-        return userDoc.data() as Map<String, dynamic>;
+        int friendsCount = await _userService.getFriendsCount(user.uid); // Use UserService
+        return {
+          ...userDoc.data() as Map<String, dynamic>,
+          'friendsCount': friendsCount, // Include friends count
+        };
       } catch (e) {
         print('Error fetching user profile: $e');
       }
     }
     return {}; // Return empty map if user is not found
-  }
-
-  // Function to update the user's description in Firestore
-  Future<void> _updateUserProfile({String? description, int? friendsCount}) async {
-    User? user = _auth.currentUser;
-    if (user != null) {
-      try {
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-          if (description != null) 'description': description,
-          if (friendsCount != null) 'friendsCount': friendsCount,
-        });
-      } catch (e) {
-        print('Error updating user profile: $e');
-      }
-    }
   }
 
   // Function to handle navigation tap
@@ -104,10 +95,25 @@ class _ProfilePageState extends State<ProfilePage> {
                             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                           SizedBox(height: 8),
-                          // Display friend count
-                          Text(
-                            'Friends: $friendsCount',
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          // Display and navigate to friends list
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FriendsListPage(),
+                                ),
+                              );
+                            },
+                            child: Row(
+                              children: [
+                                Text(
+                                  'Friends: $friendsCount',
+                                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                                ),
+                                Icon(Icons.arrow_forward_ios, size: 16),
+                              ],
+                            ),
                           ),
                           SizedBox(height: 8),
                           // Display and edit description
@@ -196,6 +202,67 @@ class _ProfilePageState extends State<ProfilePage> {
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: _onNavBarTap,
+      ),
+    );
+  }
+
+  // Function to update the user's description in Firestore
+  Future<void> _updateUserProfile({String? description}) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+          if (description != null) 'description': description,
+        });
+      } catch (e) {
+        print('Error updating user profile: $e');
+      }
+    }
+  }
+}
+
+// FriendsListPage to display the user's friends
+class FriendsListPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return Center(child: Text('Please log in to view friends.'));
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Friends List'),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('friends')
+            .doc(user.uid)
+            .collection('userFriends')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          final friends = snapshot.data!.docs;
+
+          if (friends.isEmpty) {
+            return Center(child: Text('No friends yet.'));
+          }
+
+          return ListView.builder(
+            itemCount: friends.length,
+            itemBuilder: (context, index) {
+              final friend = friends[index];
+              String friendName = friend['username'] ?? 'Unknown';
+
+              return ListTile(
+                title: Text(friendName),
+              );
+            },
+          );
+        },
       ),
     );
   }
