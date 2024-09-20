@@ -283,6 +283,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   String username = ''; // Variable to store the username
+  String profilePicture = '';
 
   @override
   void initState() {
@@ -290,14 +291,15 @@ class _HomePageState extends State<HomePage> {
     _fetchUsername(); // Fetch the username when the page initializes
   }
 
-  // Fetch the username from Firestore using the user's UID
+ // Fetch the current user's username and profilePicture
   Future<void> _fetchUsername() async {
-     try {
+    try {
       String uid = FirebaseAuth.instance.currentUser!.uid;
       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
       if (userDoc.exists) {
         setState(() {
           username = userDoc['username'];
+          profilePicture = userDoc['profileImageUrl'] ?? ''; // Use the profileImageUrl
         });
       } else {
         print('User document does not exist.');
@@ -308,6 +310,19 @@ class _HomePageState extends State<HomePage> {
         username = 'Error';
       });
     }
+  }
+
+  // Function to fetch each post owner's profile picture
+  Future<String> _fetchProfilePicture(String userId) async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      if (userDoc.exists && userDoc['profileImageUrl'] != null) {
+        return userDoc['profileImageUrl']; // Return the profile picture URL
+      }
+    } catch (e) {
+      print('Error fetching profile picture: $e');
+    }
+    return ''; // Return empty string if no profile picture found
   }
 
   void _onNavBarTap(int index) {
@@ -426,8 +441,9 @@ Widget build(BuildContext context) {
 
                 var ownerData = ownerSnapshot.data!.data() as Map<String, dynamic>?;
                 var ownerUsername = ownerData?['username'] as String? ?? 'Unknown';
+                var ownerProfilePicture = ownerData?['profileImageUrl'] as String? ?? '';
 
-                return _buildPostItem(postId, imageUrl, likes, ownerUsername);
+                return _buildPostItem(postId, imageUrl, likes, ownerUsername, ownerProfilePicture);
               },
             );
           },
@@ -442,7 +458,7 @@ Widget build(BuildContext context) {
 }
 
   
-  Widget _buildPostItem(String postId, String imageUrl, List<String> likes, String ownerUsername) {
+  Widget _buildPostItem(String postId, String imageUrl, List<String> likes, String ownerUsername, String ownerProfilePicture) {
   String userId = FirebaseAuth.instance.currentUser!.uid;
   bool isLiked = likes.contains(userId);
 
@@ -455,10 +471,13 @@ Widget build(BuildContext context) {
         children: [
           Row(
             children: [
-              const CircleAvatar(
-                radius: 20,
-                backgroundImage: AssetImage('assets/avatar.jpg'), // Placeholder for avatar
-              ),
+              CircleAvatar(
+  radius: 25, // Adjust the radius as needed
+  backgroundImage: ownerProfilePicture.isNotEmpty
+      ? NetworkImage(ownerProfilePicture) // Fetch from Firestore if profileImageUrl exists
+      : const AssetImage('assets/defaultProfilePicture.png'), // Fallback to default image
+),
+
               const SizedBox(width: 10),
               Text(ownerUsername, style: const TextStyle(fontWeight: FontWeight.bold)), // Display owner's username
             ],

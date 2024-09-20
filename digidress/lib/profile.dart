@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart'; // For picking images
+import 'dart:io';
 import 'login_page.dart';
 import 'bottomnav.dart';
-import 'userservice.dart';  // Import UserService
+import 'userservice.dart'; // Import UserService
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -14,6 +17,7 @@ class _ProfilePageState extends State<ProfilePage> {
   int _currentIndex = 4; // Index of the "Profile" screen
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final UserService _userService = UserService(); // Instantiate UserService
+  File? _image; // Store the selected image
 
   // Function to fetch user profile data from Firestore
   Future<Map<String, dynamic>> _fetchUserProfile() async {
@@ -31,6 +35,44 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     }
     return {}; // Return empty map if user is not found
+  }
+
+  // Function to handle image picking
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery); // Picking from the gallery
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path); // Store the image
+      });
+      _uploadProfilePicture(_image!); // Upload the selected image
+    }
+  }
+
+  // Function to upload the profile picture to Firebase Storage
+  Future<void> _uploadProfilePicture(File image) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        final storageRef = FirebaseStorage.instance.ref().child('profile_pictures/${user.uid}');
+        await storageRef.putFile(image); // Upload image to Firebase Storage
+        String downloadUrl = await storageRef.getDownloadURL(); // Get the image URL
+
+        // Update the user's Firestore profile with the new image URL
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+          'profileImageUrl': downloadUrl,
+        });
+
+        setState(() {
+          // Update the profile picture UI with the new image
+        });
+
+        print('Profile picture uploaded successfully!');
+      } catch (e) {
+        print('Error uploading profile picture: $e');
+      }
+    }
   }
 
   // Function to handle navigation tap
@@ -79,11 +121,16 @@ class _ProfilePageState extends State<ProfilePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Display profile picture
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundImage: profileImageUrl.isNotEmpty
-                            ? NetworkImage(profileImageUrl)
-                            : AssetImage('assets/avatar.jpg'), // Placeholder image
+                      GestureDetector(
+                        onTap: _pickImage, // Allow user to tap and select a new image
+                        child: CircleAvatar(
+                          radius: 40,
+                          backgroundImage: profileImageUrl.isNotEmpty
+                              ? NetworkImage(profileImageUrl)
+                              : (_image != null
+                                  ? FileImage(_image!)
+                                  : AssetImage('assets/defaultProfilePicture.png')) as ImageProvider, // Default profile picture
+                        ),
                       ),
                       SizedBox(width: 20),
                       Column(
