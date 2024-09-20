@@ -133,60 +133,64 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       SizedBox(width: 20),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Display username
-                          Text(
-                            username,
-                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 8),
-                          // Display and navigate to friends list
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => FriendsListPage(),
-                                ),
-                              );
-                            },
-                            child: Row(
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Display username
+                            Text(
+                              username,
+                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 8),
+                            // Display and navigate to friends list
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FriendsListPage(),
+                                  ),
+                                );
+                              },
+                              child: Row(
+                                children: [
+                                  Text(
+                                    'Friends: $friendsCount',
+                                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                                  ),
+                                  Icon(Icons.arrow_forward_ios, size: 16),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            // Display and edit description
+                            Row(
                               children: [
-                                Text(
-                                  'Friends: $friendsCount',
-                                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                                Expanded(
+                                  child: Container(
+                                    width: 200, // Adjust width as needed
+                                    child: TextField(
+                                      controller: descriptionController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Description',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      maxLines: 2, // Allow multi-line input
+                                    ),
+                                  ),
                                 ),
-                                Icon(Icons.arrow_forward_ios, size: 16),
+                                IconButton(
+                                  icon: Icon(Icons.check),
+                                  onPressed: () {
+                                    _updateUserProfile(description: descriptionController.text); // Update description
+                                    setState(() {}); // Rebuild the UI with the updated data
+                                  },
+                                ),
                               ],
                             ),
-                          ),
-                          SizedBox(height: 8),
-                          // Display and edit description
-                          Row(
-                            children: [
-                              Container(
-                                width: 200, // Adjust width as needed
-                                child: TextField(
-                                  controller: descriptionController,
-                                  decoration: InputDecoration(
-                                    labelText: 'Description',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  maxLines: 2, // Allow multi-line input
-                                ),
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.check),
-                                onPressed: () {
-                                  _updateUserProfile(description: descriptionController.text); // Update description
-                                  setState(() {}); // Rebuild the UI with the updated data
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
