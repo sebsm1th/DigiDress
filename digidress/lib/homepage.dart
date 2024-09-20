@@ -379,30 +379,38 @@ Future<void> _addComment(String postId, String comment) async {
   }
 }
 
-
-
-
   @override
 Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
       automaticallyImplyLeading: false,
-      title: const Text('Digidress'),
       centerTitle: true,
-      backgroundColor: Colors.white,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications, color: Colors.black),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ActivityPage()),
-            );
-          },
-        ),
-        const SizedBox(width: 10),
-      ],
+      backgroundColor: Color(0xFFFFFDF5),
+      elevation: 0,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/logo1.png',
+            height: 80,
+            width: 80,
+            fit: BoxFit.contain,
     ),
+        ],
+  ),
+  actions: [
+    IconButton(
+      icon: const Icon(Icons.notifications, color: Colors.black),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ActivityPage()),
+        );
+      },
+    ),
+    const SizedBox(width: 10),
+  ],
+),
     body: StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('posts').orderBy('createdAt', descending: true).snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -456,7 +464,6 @@ Widget build(BuildContext context) {
     ),
   );
 }
-
   
   Widget _buildPostItem(String postId, String imageUrl, List<String> likes, String ownerUsername, String ownerProfilePicture) {
   String userId = FirebaseAuth.instance.currentUser!.uid;
@@ -648,7 +655,4 @@ Widget build(BuildContext context) {
     },
   );
 }
-
-
-
 }

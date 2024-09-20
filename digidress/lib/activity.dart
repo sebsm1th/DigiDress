@@ -28,9 +28,19 @@ class _ActivityPageState extends State<ActivityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Activity'),
-        backgroundColor: Colors.white,
+       appBar: AppBar(
+        backgroundColor: Color(0xFFFFFDF5),
+        title: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/logo1.png',
+            height: 80,
+            width: 80,
+            fit: BoxFit.contain,
+          ),
+        ],
+      ),
       ),
       body: Column(
         children: [

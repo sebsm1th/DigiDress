@@ -33,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 Image.asset(
                   'assets/logo1.png', 
-                  height: 400, 
+                  height: 250, 
                 ),
                 const SizedBox(height: 30), // Add spacing between logo and text fields
                 TextField(

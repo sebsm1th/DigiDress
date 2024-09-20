@@ -62,23 +62,34 @@ class _AvatarPageState extends State<AvatarPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text('Digidress - Avatar'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.camera_alt),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const Posting()),
-              );
-            },
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      backgroundColor: Color(0xFFFFFDF5),
+      automaticallyImplyLeading: false,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/logo1.png',
+            height: 80,
+            width: 80,
+            fit: BoxFit.contain,
           ),
         ],
       ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.camera_alt),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const Posting()),
+            );
+          },
+        ),
+      ],
+    ),
       body: Column(
         children: [
           // Weather Info Row
