@@ -21,12 +21,20 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text('Chat Page'),
-        centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        backgroundColor: Color(0xFFFFFDF5),
+        title: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/logo1.png',
+            height: 80,
+            width: 80,
+            fit: BoxFit.contain,
+          ),
+        ],
       ),
-      body: const Center(child: Text('Chat Page Content')),
+      ),
+      body: const Center(child: Text('Chat content')),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: _onNavBarTap,
