@@ -107,46 +107,66 @@ class _ProfilePageState extends State<ProfilePage> {
                             ? NetworkImage(profileImageUrl)
                             : const AssetImage('assets/avatar.jpg'), // Placeholder image
                       ),
-                      const SizedBox(width: 20),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Display username
-                          Text(
-                            username,
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 8),
-                          // Display friend count
-                          Text(
-                            'Friends: $friendsCount',
-                            style: const TextStyle(fontSize: 16, color: Colors.grey),
-                          ),
-                          const SizedBox(height: 8),
-                          // Display and edit description
-                          Row(
-                            children: [
-                              SizedBox(
-                                width: 200, // Adjust width as needed
-                                child: TextField(
-                                  controller: descriptionController,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Description',
-                                    border: OutlineInputBorder(),
+                      
+                      SizedBox(width: 20),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Display username
+                            Text(
+                              username,
+                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 8),
+                            // Display and navigate to friends list
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FriendsListPage(),
                                   ),
-                                  maxLines: 2, // Allow multi-line input
+                                );
+                              },
+                              child: Row(
+                                children: [
+                                  Text(
+                                    'Friends: $friendsCount',
+                                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                                  ),
+                                  Icon(Icons.arrow_forward_ios, size: 16),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            // Display and edit description
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    width: 200, // Adjust width as needed
+                                    child: TextField(
+                                      controller: descriptionController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Description',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      maxLines: 2, // Allow multi-line input
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.check),
-                                onPressed: () {
-                                  _updateUserProfile(description: descriptionController.text); // Update description
-                                  setState(() {}); // Rebuild the UI with the updated data
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
+                                IconButton(
+                                  icon: Icon(Icons.check),
+                                  onPressed: () {
+                                    _updateUserProfile(description: descriptionController.text); // Update description
+                                    setState(() {}); // Rebuild the UI with the updated data
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
