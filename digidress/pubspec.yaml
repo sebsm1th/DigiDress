@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   firebase_core: ^3.4.1
-  model_viewer_plus: ^1.8.0
+  o3d: ^3.1.0
   
 
   
@@ -88,6 +88,8 @@ flutter:
     - assets/logo1.png
     - assets/logo2.png
     - assets/defaultProfilePicture.png
+    - assets/Female.glb
+    - assets/Dress.glb
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
