@@ -75,16 +75,6 @@ flutter:
   # Add the assets section
   assets:
     - assets/avatar.jpg
-    - assets/post1.jpg
-    - assets/post2.jpg
-    - assets/post3.jpg
-    - assets/post4.jpg
-    - assets/post5.jpg
-    - assets/post6.jpg
-    - assets/post7.jpg
-    - assets/post8.jpg
-    - assets/post9.jpg
-    - assets/post10.jpg
     - assets/logo1.png
     - assets/logo2.png
     - assets/defaultProfilePicture.png
