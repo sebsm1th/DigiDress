@@ -35,6 +35,8 @@ class _SearchPageState extends State<SearchPage> {
         isLoading = true;
       });
 
+      String lowercaseQuery = query.toLowerCase();
+
       // Fetch search results
       List<DocumentSnapshot> users = await userService.searchUsers(query);
 
@@ -78,7 +80,7 @@ class _SearchPageState extends State<SearchPage> {
           onChanged: (query) {
             searchUsers(query); // Call search method on text change
           },
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Search...',
             border: InputBorder.none,
           ),
@@ -86,14 +88,14 @@ class _SearchPageState extends State<SearchPage> {
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.of(context).pop(); // Navigate back
           },
         ),
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: searchResults.length,
               itemBuilder: (context, index) {
@@ -108,13 +110,13 @@ class _SearchPageState extends State<SearchPage> {
                           future: isAlreadyFriends(user.id), // Check if already friends
                           builder: (context, snapshot) {
                             if (snapshot.connectionState == ConnectionState.waiting) {
-                              return CircularProgressIndicator(); // Show loading indicator while checking friendship status
+                              return const CircularProgressIndicator(); // Show loading indicator while checking friendship status
                             }
                             if (snapshot.hasData && snapshot.data == true) {
-                              return Text('Friends'); // Display "Friends" if they are already friends
+                              return const Text('Friends'); // Display "Friends" if they are already friends
                             } else {
                               return ElevatedButton(
-                                child: Text('Add Friend'),
+                                child: const Text('Add Friend'),
                                 onPressed: () async {
                                   bool alreadySent = await isFriendRequestSent(user.id);
 
@@ -123,14 +125,14 @@ class _SearchPageState extends State<SearchPage> {
 
                                     // Show success message
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
+                                      const SnackBar(
                                         content: Text('Friend request sent!'),
                                       ),
                                     );
                                   } else {
                                     // Show error message
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
+                                      const SnackBar(
                                         content: Text('Friend request already exists!'),
                                       ),
                                     );
