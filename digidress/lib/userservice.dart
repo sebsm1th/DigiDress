@@ -45,6 +45,7 @@ class UserService {
 
   // Add friend to current user's friends list
   await FirebaseFirestore.instance.collection('friends').doc(currentUserID).collection('userFriends').doc(friendID).set({
+    'userID': friendID,  // Add friend's user ID
     'username': friendUsername,
     'status': 'accepted',
     'timestamp': FieldValue.serverTimestamp(),
@@ -52,6 +53,7 @@ class UserService {
 
   // Add current user to friend's friends list
   await FirebaseFirestore.instance.collection('friends').doc(friendID).collection('userFriends').doc(currentUserID).set({
+    'userID': currentUserID,  // Add current user's ID
     'username': currentUserUsername,
     'status': 'accepted',
     'timestamp': FieldValue.serverTimestamp(),
