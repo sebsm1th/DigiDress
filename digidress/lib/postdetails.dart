@@ -257,9 +257,7 @@ class _PostDetailsState extends State<PostDetails> {
         await FirebaseFirestore.instance
             .collection('posts')
             .doc(postId)
-            .update({
-          'isArchived': true, // Mark the post as archived
-        });
+            .update({'isArchived': true}); // Mark the post as archived
 
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Post archived successfully')));
