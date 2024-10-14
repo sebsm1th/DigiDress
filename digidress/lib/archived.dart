@@ -3,28 +3,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'postdetails.dart';
 
-class ArchivedPosts extends StatelessWidget {
+class ArchivedPosts extends StatefulWidget {
+  ArchivedPosts({super.key});
+
+  @override
+  _ArchivedPostsState createState() => _ArchivedPostsState();
+}
+
+class _ArchivedPostsState extends State<ArchivedPosts> {
   String currentUserId = FirebaseAuth.instance.currentUser!.uid;
-
-  // Function to unarchive a post
-  Future<void> _unarchivePost(String postId, Map<String, dynamic> postData) async {
-    try {
-      // Move the post back to the 'posts' collection
-      await FirebaseFirestore.instance.collection('posts').doc(postId).set(postData);
-
-      // Remove the post from 'archivedPosts' collection
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUserId)
-          .collection('archivedPosts')
-          .doc(postId)
-          .delete();
-
-      print('Post unarchived successfully');
-    } catch (e) {
-      print('Error unarchiving post: $e');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,36 +58,12 @@ class ArchivedPosts extends StatelessWidget {
                     ),
                   );
                 },
-                onLongPress: () {
-                  // Show dialog to unarchive post
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Unarchive Post'),
-                        content: const Text('Do you want to unarchive this post?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Close dialog
-                            },
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              _unarchivePost(postId, postData); // Unarchive the post
-                              Navigator.of(context).pop(); // Close dialog
-                            },
-                            child: const Text('Unarchive'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
                 child: Image.network(
                   imageUrl,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.broken_image, size: 50);
+                  },
                 ),
               );
             },
