@@ -84,7 +84,9 @@ class _PostingState extends State<Posting> {
         'userId': user.uid,
         'imageUrl': downloadUrl,
         'createdAt': FieldValue.serverTimestamp(),
-        'likes': []// Empty list for likes
+        'likes': [],// Empty list for likes
+        'comments': [], // Add empty comments list
+        'isArchived': false,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
