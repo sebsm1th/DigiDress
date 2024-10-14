@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'profile.dart';
 import 'archived.dart';
 
 class PostDetails extends StatefulWidget {
@@ -106,6 +107,10 @@ class _PostDetailsState extends State<PostDetails> {
                           if (value == 'archive' && !widget.isArchived) {
                             _archivePost(widget
                                 .postId); // Archive method if post is not already archived
+                          } else if (value == 'unarchive' &&
+                              widget.isArchived) {
+                            _unarchivePost(widget
+                                .postId); // Unarchive method if post is already archived
                           } else if (value == 'delete') {
                             _showDeleteConfirmationDialog(
                                 widget.postId); // Show delete confirmation
@@ -118,6 +123,12 @@ class _PostDetailsState extends State<PostDetails> {
                               const PopupMenuItem<String>(
                                 value: 'archive',
                                 child: Text('Archive'),
+                              ),
+                            if (widget
+                                .isArchived) // Show 'unarchive' if the post is already archived
+                              const PopupMenuItem<String>(
+                                value: 'unarchive',
+                                child: Text('Unarchive'),
                               ),
                             const PopupMenuItem<String>(
                               value: 'delete',
@@ -145,90 +156,36 @@ class _PostDetailsState extends State<PostDetails> {
     );
   }
 
-  // Add a comment
-  Future<void> _addComment(
-      String postId, String comment, String username) async {
-    String userId = FirebaseAuth.instance.currentUser!.uid;
-
-    try {
-      await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(postId)
-          .collection('comments')
-          .add({
-        'comment': comment,
-        'timestamp': FieldValue.serverTimestamp(),
-        'userId': userId,
-        'username': username, // Use the fetched username
-      });
-
-      _fetchPostDetails(); // Refresh post details after adding a comment
-    } catch (e) {
-      print('Error adding comment: $e');
-    }
-  }
-
-  // Build the comments section
-  Widget _buildCommentsSection() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.postId)
-          .collection('comments')
-          .orderBy('timestamp', descending: true)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text('No comments yet.'),
-          );
-        }
-
-        var comments = snapshot.data!.docs;
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: comments.map((doc) {
-              var commentData = doc.data() as Map<String, dynamic>;
-
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${commentData['username'] ?? 'Unknown'}: ',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        commentData['comment'] ?? 'No comment',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> _deletePost(String postId) async {
     try {
-      await FirebaseFirestore.instance.collection('posts').doc(postId).delete();
+      // Check if the post is archived or not
+      if (widget.isArchived) {
+        // Delete the post from the 'archivedPosts' collection
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUserId)
+            .collection('archivedPosts')
+            .doc(postId)
+            .delete();
+      } else {
+        // Delete the post from the 'posts' collection
+        await FirebaseFirestore.instance
+            .collection('posts')
+            .doc(postId)
+            .delete();
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Post deleted successfully')));
+        const SnackBar(content: Text('Post deleted successfully')),
+      );
+
+      // Navigate back after deletion
+      Navigator.of(context).pop();
     } catch (e) {
       print('Error deleting post: $e');
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Failed to delete post')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to delete post')),
+      );
     }
   }
 
@@ -311,6 +268,53 @@ class _PostDetailsState extends State<PostDetails> {
       print('Error archiving post: $e');
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to archive post')));
+    }
+  }
+
+  Future<void> _unarchivePost(String postId) async {
+    try {
+      // Get the post data from 'archivedPosts' collection
+      DocumentSnapshot archivedPostSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUserId)
+          .collection('archivedPosts')
+          .doc(postId)
+          .get();
+
+      if (archivedPostSnapshot.exists) {
+        var postData = archivedPostSnapshot.data() as Map<String, dynamic>;
+
+        // Move the post back to 'posts' collection
+        await FirebaseFirestore.instance.collection('posts').doc(postId).set({
+          ...postData,
+          'isArchived': false, // Set archived status to false
+        });
+
+        // Delete the post from 'archivedPosts' collection
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUserId)
+            .collection('archivedPosts')
+            .doc(postId)
+            .delete();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Post unarchived successfully')),
+        );
+
+        // Navigate back to profile page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  const ProfilePage()), // Ensure ProfilePage is defined or imported
+        );
+      }
+    } catch (e) {
+      print('Error unarchiving post: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to unarchive post')),
+      );
     }
   }
 
@@ -402,6 +406,81 @@ class _PostDetailsState extends State<PostDetails> {
               child: const Text('Post'),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  // Add a comment
+  Future<void> _addComment(
+      String postId, String comment, String username) async {
+    String userId = FirebaseAuth.instance.currentUser!.uid;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(postId)
+          .collection('comments')
+          .add({
+        'comment': comment,
+        'timestamp': FieldValue.serverTimestamp(),
+        'userId': userId,
+        'username': username, // Use the fetched username
+      });
+
+      _fetchPostDetails(); // Refresh post details after adding a comment
+    } catch (e) {
+      print('Error adding comment: $e');
+    }
+  }
+
+  // Build the comments section
+  Widget _buildCommentsSection() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('posts')
+          .doc(widget.postId)
+          .collection('comments')
+          .orderBy('timestamp', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text('No comments yet.'),
+          );
+        }
+
+        var comments = snapshot.data!.docs;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: comments.map((doc) {
+              var commentData = doc.data() as Map<String, dynamic>;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${commentData['username'] ?? 'Unknown'}: ',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        commentData['comment'] ?? 'No comment',
+                        style: TextStyle(color: Colors.grey[700]),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
         );
       },
     );
