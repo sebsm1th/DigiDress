@@ -5,8 +5,8 @@ class UserService {
   Future<List<DocumentSnapshot>> searchUsers(String query) async {
     QuerySnapshot result = await FirebaseFirestore.instance
         .collection('users')
-        .where('username', isGreaterThanOrEqualTo: query)
-        .where('username', isLessThanOrEqualTo: '$query\uf8ff')
+        .where('username_lowercase', isGreaterThanOrEqualTo: query)
+        .where('username_lowercase', isLessThanOrEqualTo: '$query\uf8ff')
         .get();
 
     return result.docs;

@@ -144,6 +144,7 @@ Future<void> _createUserInFirestore(String uid, String email, String username, S
   try {
     await _firestore.collection('users').doc(uid).set({
       'username': username,
+      'username_lowercase': username.toLowerCase(), // Lowercase version for search
       'email': email,
       'createdAt': FieldValue.serverTimestamp(),
       'friendsCount': 0, // Initialize friendsCount to 0

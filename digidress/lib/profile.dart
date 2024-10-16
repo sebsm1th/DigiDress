@@ -173,7 +173,7 @@ class _ProfilePageState extends State<ProfilePage> {
             },
           ),
         ],
-      ),
+         
       body: FutureBuilder<Map<String, dynamic>>(
         future: _fetchUserProfile(),
         builder: (context, snapshot) {

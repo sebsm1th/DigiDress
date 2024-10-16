@@ -91,6 +91,7 @@ class _HomePageState extends State<HomePage> {
       var postsSnapshot = await FirebaseFirestore.instance
           .collection('posts')
           .where('userId', isEqualTo: friendId)
+          .where('isArchived', isEqualTo: false) 
           .get();
 
       // Add the fetched posts to the friendPosts list
