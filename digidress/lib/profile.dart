@@ -1,3 +1,4 @@
+import 'package:digidress/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -93,18 +94,29 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       appBar: AppBar(
-       backgroundColor: Color(0xFFFFFDF5),
+        backgroundColor: Color(0xFFFFFDF5),
         title: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/logo1.png',
-            height: 80,
-            width: 80,
-            fit: BoxFit.contain,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/logo1.png',
+              height: 80,
+              width: 80,
+              fit: BoxFit.contain,
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsPage()), // Navigate to SettingsPage
+              );
+            },
           ),
         ],
-      ),
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _fetchUserProfile(),
