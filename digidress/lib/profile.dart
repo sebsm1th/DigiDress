@@ -159,7 +159,22 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
         ),
+           actions: [
+      IconButton(
+        icon: const Icon(Icons.settings),
+        onPressed: () {
+          // Navigate to the settings page
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SettingsPage(),
+            ),
+          );
+        },
       ),
+    ],
+  ),
+         
       body: FutureBuilder<Map<String, dynamic>>(
         future: _fetchUserProfile(),
         builder: (context, snapshot) {
