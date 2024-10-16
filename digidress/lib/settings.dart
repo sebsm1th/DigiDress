@@ -5,6 +5,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'login_page.dart';
 
 class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+
   Future<void> _deleteAccount(BuildContext context) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -17,7 +19,7 @@ class SettingsPage extends StatelessWidget {
       if (!loggedIn) {
         print('User login failed or was canceled.');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed. Please try again.')),
+          const SnackBar(content: Text('Login failed. Please try again.')),
         );
         return;
       }
@@ -46,12 +48,12 @@ class SettingsPage extends StatelessWidget {
           await user.delete();
 
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => LoginPage()),
+            MaterialPageRoute(builder: (context) => const LoginPage()),
             (route) => false,
           );
 
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Account and data deleted successfully')),
+            const SnackBar(content: Text('Account and data deleted successfully')),
           );
         } else {
           print('User canceled the deletion process.');
@@ -59,7 +61,7 @@ class SettingsPage extends StatelessWidget {
       } catch (e) {
         print('Error deleting account: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting account. Please try again later.')),
+          const SnackBar(content: Text('Error deleting account. Please try again later.')),
         );
       }
     } else {
@@ -70,22 +72,22 @@ class SettingsPage extends StatelessWidget {
   Future<bool> _showLoginForm(BuildContext context) async {
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
 
     return await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: Text('Re-Login to Continue'),
+          title: const Text('Re-Login to Continue'),
           content: Form(
-            key: _formKey,
+            key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextFormField(
                   controller: emailController,
-                  decoration: InputDecoration(labelText: 'Email'),
+                  decoration: const InputDecoration(labelText: 'Email'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
@@ -95,7 +97,7 @@ class SettingsPage extends StatelessWidget {
                 ),
                 TextFormField(
                   controller: passwordController,
-                  decoration: InputDecoration(labelText: 'Password'),
+                  decoration: const InputDecoration(labelText: 'Password'),
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -109,15 +111,15 @@ class SettingsPage extends StatelessWidget {
           ),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(dialogContext).pop(false);
               },
             ),
             TextButton(
-              child: Text('Login'),
+              child: const Text('Login'),
               onPressed: () async {
-                if (_formKey.currentState?.validate() ?? false) {
+                if (formKey.currentState?.validate() ?? false) {
                   String email = emailController.text.trim();
                   String password = passwordController.text.trim();
 
@@ -130,7 +132,7 @@ class SettingsPage extends StatelessWidget {
                   } catch (e) {
                     print('Login failed: $e');
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Login failed. Please check your credentials.')),
+                      const SnackBar(content: Text('Login failed. Please check your credentials.')),
                     );
                   }
                 }
@@ -148,18 +150,18 @@ class SettingsPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete Account'),
-          content: Text('Are you sure you want to delete your account? This action cannot be undone.'),
+          title: const Text('Delete Account'),
+          content: const Text('Are you sure you want to delete your account? This action cannot be undone.'),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
                 print('User canceled account deletion.');
                 Navigator.of(context).pop(false);
               },
             ),
             TextButton(
-              child: Text('Delete'),
+              child: const Text('Delete'),
               onPressed: () {
                 print('User confirmed account deletion.');
                 Navigator.of(context).pop(true);
@@ -254,22 +256,35 @@ class SettingsPage extends StatelessWidget {
     }
   }
 
+  Future<void> _logout(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        title: const Text('Settings'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
+              onPressed: () => _logout(context),
+              child: const Text('Logout'),
+            ),
+            const SizedBox(height: 20), // Add space between buttons
+            ElevatedButton(
               onPressed: () => _deleteAccount(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
               ),
-              child: Text('Delete Account'),
+              child: const Text('Delete Account'),
             ),
           ],
         ),
