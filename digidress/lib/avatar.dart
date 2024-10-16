@@ -129,7 +129,7 @@ class _AvatarPageState extends State<AvatarPage> {
                 children: [
                   // Your Avatar
                   Expanded(
-                    child: Image.asset('assets/avatar.jpg'), // Replace with actual avatar widget
+                    child: Image.asset('assets/transparent.png'), // Replace with actual avatar widget
                   ),
 
                   // Outfit Controls
