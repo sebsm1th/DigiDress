@@ -1,3 +1,4 @@
+import 'package:digidress/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -158,6 +159,20 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              // Navigate to the settings page
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SettingsPage(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _fetchUserProfile(),
@@ -276,7 +291,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     child: TextField(
                                       controller: descriptionController,
                                       decoration: const InputDecoration(
-                                        labelText: 'Description',
+                                        labelText: 'Bio',
                                         border: OutlineInputBorder(),
                                       ),
                                       maxLines: 2, // Allow multi-line input
@@ -360,19 +375,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(
                     height:
                         20), // Add some spacing between the posts and the button
-                ElevatedButton(
-                  onPressed: () {
-                    // Log out the user and navigate back to the login screen
-                    _auth.signOut().then((_) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const LoginPage()),
-                      );
-                    });
-                  },
-                  child: const Text('Logout'),
-                ),
               ],
             );
           }
