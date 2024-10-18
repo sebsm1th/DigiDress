@@ -79,7 +79,7 @@ class _ProfilePageState extends State<ProfilePage> {
             .update({
           'profileImageUrl': downloadUrl,
         });
-
+        
         setState(() {
           // Update the profile picture UI with the new image
         });
@@ -167,7 +167,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => SettingsPage(),
+                  builder: (context) => const SettingsPage(),
                 ),
               );
             },
@@ -243,7 +243,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       Navigator.of(context).push(
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                ArchivedPosts()),
+                                                 ArchivedPosts()),
                                       );
                                     }
                                   },
@@ -477,10 +477,27 @@ class FriendsListPage extends StatelessWidget {
             itemCount: friends.length,
             itemBuilder: (context, index) {
               final friend = friends[index];
-              String friendName = friend['username'] ?? 'Unknown';
+              String friendId = friend['userID'] ?? 'Unknown'; // Friend's userID
 
-              return ListTile(
-                title: Text(friendName),
+              // Fetch the friend's latest username from the 'users' collection
+              return FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(friendId)
+                    .get(),
+                builder: (context, friendSnapshot) {
+                  if (!friendSnapshot.hasData) {
+                    return const ListTile(
+                      title: Text('Loading...'),
+                    );
+                  }
+                  final friendData = friendSnapshot.data!.data() as Map<String, dynamic>?;
+                  String friendName = friendData?['username'] ?? 'Unknown';
+
+                  return ListTile(
+                    title: Text(friendName),
+                  );
+                },
               );
             },
           );
