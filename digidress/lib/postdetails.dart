@@ -171,7 +171,7 @@ class _PostDetailsState extends State<PostDetails> {
         // Delete the post from the 'posts' collection
         await FirebaseFirestore.instance
             .collection('posts')
-            .doc(postId)
+            .doc(postId) 
             .delete();
       }
 

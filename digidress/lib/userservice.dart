@@ -129,5 +129,38 @@ class UserService {
     }
   }
 
+  // Function to update the username in all userFriends subcollections
+Future<void> updateUsernameInFriendsLists(String userID, String newUsername) async {
+  try {
+    // Fetch all users from the 'friends' collection
+    QuerySnapshot usersWithFriends = await FirebaseFirestore.instance.collection('friends').get();
+
+    // Iterate through each user document
+    for (var userDoc in usersWithFriends.docs) {
+      // Access the userFriends subcollection of each user
+      QuerySnapshot userFriends = await FirebaseFirestore.instance
+          .collection('friends')
+          .doc(userDoc.id)
+          .collection('userFriends')
+          .where('userID', isEqualTo: userID)  // Find where the user appears in userFriends
+          .get();
+
+      // Iterate through userFriends to update the username where found
+      for (var friendDoc in userFriends.docs) {
+        await FirebaseFirestore.instance
+            .collection('friends')
+            .doc(userDoc.id)
+            .collection('userFriends')
+            .doc(friendDoc.id)
+            .update({'username': newUsername});
+      }
+    }
+    print('Username updated in all friends lists.');
+  } catch (e) {
+    print('Error updating username in friends lists: $e');
+  }
+}
+
+
 
 }

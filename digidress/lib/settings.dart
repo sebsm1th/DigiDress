@@ -4,20 +4,108 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'login_page.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
-  Future<void> _deleteAccount(BuildContext context) async {
-    User? user = FirebaseAuth.instance.currentUser;
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  TextEditingController usernameController = TextEditingController();
+  User? user = FirebaseAuth.instance.currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentUsername(); // Load the current username when the widget is created
+  }
+
+  // Fetch the current username from Firestore and set it in the TextField
+  Future<void> _loadCurrentUsername() async {
     if (user != null) {
-      print('User found: ${user.email}');
-      
-      // Show the mini login form within the settings page for user to re-login
+      try {
+        // Fetch the current username from Firestore
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .get();
+        String currentUsername = userDoc['username'] ?? '';
+
+        setState(() {
+          // Set the fetched username as the initial value for the TextField
+          usernameController.text = currentUsername;
+        });
+      } catch (e) {
+        print('Error loading username: $e');
+      }
+    }
+  }
+
+  // Function to update the username in Firestore and all friends lists
+  Future<void> _updateUsername(BuildContext context, String newUsername) async {
+    if (user != null) {
+      try {
+        // Update the user's Firestore document with the new username
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .update({'username': newUsername});
+
+        // Call the function to update the username in all friends lists
+        await updateUsernameInFriendsLists(user!.uid, newUsername);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Username updated successfully')),
+        );
+      } catch (e) {
+        print('Error updating username: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to update username')),
+        );
+      }
+    }
+  }
+
+  // Function to update the username in all userFriends subcollections
+  Future<void> updateUsernameInFriendsLists(String userID, String newUsername) async {
+    try {
+      // Fetch all users from the 'friends' collection
+      QuerySnapshot usersWithFriends = await FirebaseFirestore.instance.collection('friends').get();
+
+      // Iterate through each user document
+      for (var userDoc in usersWithFriends.docs) {
+        // Access the userFriends subcollection of each user
+        QuerySnapshot userFriends = await FirebaseFirestore.instance
+            .collection('friends')
+            .doc(userDoc.id)
+            .collection('userFriends')
+            .where('userID', isEqualTo: userID)  // Find where the user appears in userFriends
+            .get();
+
+        // Iterate through userFriends to update the username where found
+        for (var friendDoc in userFriends.docs) {
+          await FirebaseFirestore.instance
+              .collection('friends')
+              .doc(userDoc.id)
+              .collection('userFriends')
+              .doc(friendDoc.id)
+              .update({'username': newUsername});
+        }
+      }
+      print('Username updated in all friends lists.');
+    } catch (e) {
+      print('Error updating username in friends lists: $e');
+    }
+  }
+
+  // Function to delete the user's account and all associated data
+  Future<void> _deleteAccount(BuildContext context) async {
+    if (user != null) {
+      print('User found: ${user!.email}');
+
       bool loggedIn = await _showLoginForm(context);
-      print('Login form result: $loggedIn');
-      
       if (!loggedIn) {
-        print('User login failed or was canceled.');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login failed. Please try again.')),
         );
@@ -26,26 +114,24 @@ class SettingsPage extends StatelessWidget {
 
       try {
         bool confirm = await _showConfirmationDialog(context);
-        print('User confirmed deletion: $confirm');
-
         if (confirm) {
           print('Deleting user data...');
-          await _deleteUserData(user.uid);
+          await _deleteUserData(user!.uid);
 
           print('Deleting user friend requests...');
-          await _deleteFriendRequests(user.uid);
+          await _deleteFriendRequests(user!.uid);
 
           print('Deleting user friends and removing references...');
-          await _deleteUserFriendsAndReferences(user.uid);
+          await _deleteUserFriendsAndReferences(user!.uid);
 
           print('Deleting user files...');
-          await _deleteUserFiles(user.uid);
+          await _deleteUserFiles(user!.uid);
 
-          print('Deleting user posts');
-          await _deleteUserPosts(user.uid);
+          print('Deleting user posts...');
+          await _deleteUserPosts(user!.uid);
 
           print('Deleting user account...');
-          await user.delete();
+          await user!.delete();
 
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -125,12 +211,10 @@ class SettingsPage extends StatelessWidget {
 
                   try {
                     // Attempt to re-login the user
-                    UserCredential userCredential = await FirebaseAuth.instance
-                        .signInWithEmailAndPassword(email: email, password: password);
-                    print('Login successful.');
+                    await FirebaseAuth.instance.signInWithEmailAndPassword(
+                        email: email, password: password);
                     Navigator.of(dialogContext).pop(true);
                   } catch (e) {
-                    print('Login failed: $e');
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Login failed. Please check your credentials.')),
                     );
@@ -145,7 +229,6 @@ class SettingsPage extends StatelessWidget {
   }
 
   Future<bool> _showConfirmationDialog(BuildContext context) async {
-    print('Confirmation dialog opened.');
     return await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -156,14 +239,12 @@ class SettingsPage extends StatelessWidget {
             TextButton(
               child: const Text('Cancel'),
               onPressed: () {
-                print('User canceled account deletion.');
                 Navigator.of(context).pop(false);
               },
             ),
             TextButton(
               child: const Text('Delete'),
               onPressed: () {
-                print('User confirmed account deletion.');
                 Navigator.of(context).pop(true);
               },
             ),
@@ -174,14 +255,10 @@ class SettingsPage extends StatelessWidget {
   }
 
   Future<void> _deleteUserData(String userId) async {
-    print('Deleting Firestore data for user: $userId');
     await FirebaseFirestore.instance.collection('users').doc(userId).delete();
   }
 
   Future<void> _deleteFriendRequests(String userId) async {
-    print('Deleting friend requests for user: $userId');
-    
-    // Delete friend requests sent by the user
     var sentRequests = await FirebaseFirestore.instance
         .collection('friendRequests')
         .where('from', isEqualTo: userId)
@@ -190,7 +267,6 @@ class SettingsPage extends StatelessWidget {
       await doc.reference.delete();
     }
     
-    // Delete friend requests received by the user
     var receivedRequests = await FirebaseFirestore.instance
         .collection('friendRequests')
         .where('to', isEqualTo: userId)
@@ -198,23 +274,16 @@ class SettingsPage extends StatelessWidget {
     for (var doc in receivedRequests.docs) {
       await doc.reference.delete();
     }
-
-    print('Deleted all friend requests for user: $userId');
   }
 
   Future<void> _deleteUserFriendsAndReferences(String userId) async {
-    print('Deleting userFriends subcollection and removing user from friends lists: $userId');
-    
-    // Get the user's friends
     var userFriends = await FirebaseFirestore.instance
         .collection('friends')
         .doc(userId)
         .collection('userFriends')
         .get();
 
-    // Delete each friend in the user's own friends list
     for (var doc in userFriends.docs) {
-      // Remove the user from their friend's userFriends list
       String friendId = doc.id;
       await FirebaseFirestore.instance
           .collection('friends')
@@ -222,16 +291,11 @@ class SettingsPage extends StatelessWidget {
           .collection('userFriends')
           .doc(userId)
           .delete();
-
-      // Delete the friend from the user's friends list
       await doc.reference.delete();
     }
-
-    print('Deleted all friends and references for user: $userId');
   }
 
   Future<void> _deleteUserFiles(String userId) async {
-    print('Deleting Firebase Storage files for user: $userId');
     final profilePicRef = FirebaseStorage.instance.ref().child('profile_pictures/$userId');
     final postsRef = FirebaseStorage.instance.ref().child('posts/$userId');
 
@@ -240,18 +304,15 @@ class SettingsPage extends StatelessWidget {
   }
 
   Future<void> _deleteUserPosts(String userId) async {
-    print('Deleting FireStore posts');
     await FirebaseFirestore.instance.collection('posts').doc(userId).delete();
   }
 
   Future<void> _deleteFolderRecursively(Reference folderRef) async {
     ListResult result = await folderRef.listAll();
     for (Reference fileRef in result.items) {
-      print('Deleting file: ${fileRef.fullPath}');
       await fileRef.delete();
     }
     for (Reference subfolderRef in result.prefixes) {
-      print('Recursively deleting subfolder: ${subfolderRef.fullPath}');
       await _deleteFolderRecursively(subfolderRef);
     }
   }
@@ -285,6 +346,31 @@ class SettingsPage extends StatelessWidget {
                 backgroundColor: Colors.red,
               ),
               child: const Text('Delete Account'),
+            ),
+            const SizedBox(height: 20), // Add space between buttons
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: TextField(
+                controller: usernameController,
+                decoration: const InputDecoration(
+                  labelText: 'New Username',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20), // Add space between text field and button
+            ElevatedButton(
+              onPressed: () {
+                String newUsername = usernameController.text.trim();
+                if (newUsername.isNotEmpty) {
+                  _updateUsername(context, newUsername);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter a valid username')),
+                  );
+                }
+              },
+              child: const Text('Update Username'),
             ),
           ],
         ),
