@@ -79,6 +79,13 @@ flutter:
     - assets/logo2.png
     - assets/defaultProfilePicture.png
     - assets/transparent.png
+    - assets/clothes.png
+    - assets/avatarblank.png
+    - assets/test.png
+    - assets/dress.png
+    - assets/dress2.png
+    - assets/jeans.png
+    - assets/flare.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
