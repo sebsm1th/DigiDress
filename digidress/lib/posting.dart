@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'backgroundremover.dart';
 
 class Posting extends StatefulWidget {
   const Posting({super.key});
@@ -145,6 +146,19 @@ class _PostingState extends State<Posting> {
                 ElevatedButton(
                   onPressed: _uploadImage,
                   child: const Text('Post'),
+                ),
+                const SizedBox(height: 20),
+                // Add a button to navigate to the Background Remover page for testing.
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BackgroundRemover(),
+                      ),
+                    );
+                  },
+                  child: const Text('Test Background Remover'),
                 ),
               ],
             ),
