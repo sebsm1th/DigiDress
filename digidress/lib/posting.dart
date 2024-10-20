@@ -147,19 +147,19 @@ class _PostingState extends State<Posting> {
                   onPressed: _uploadImage,
                   child: const Text('Post'),
                 ),
-                const SizedBox(height: 20),
-                // Add a button to navigate to the Background Remover page for testing.
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BackgroundRemover(),
-                      ),
-                    );
-                  },
-                  child: const Text('Test Background Remover'),
-                ),
+                // const SizedBox(height: 20),
+                // // Add a button to navigate to the Background Remover page for testing.
+                // ElevatedButton(
+                //   onPressed: () {
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //         builder: (context) => BackgroundRemover(),
+                //       ),
+                //     );
+                //   },
+                //   child: const Text('Test Background Remover'),
+                // ),
               ],
             ),
           ),
