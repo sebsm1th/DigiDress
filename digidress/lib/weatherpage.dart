@@ -13,6 +13,7 @@ class WeatherPage extends StatefulWidget {
 class _WeatherPageState extends State<WeatherPage> {
   Map<String, dynamic>? weatherData;
   bool isLoading = true;
+  bool hasError = false;  // New flag to handle error states
 
   // OpenWeatherMap API Key
   final String apiKey = '9bed8a23f096d258cbf41798a94c060a';
@@ -69,11 +70,20 @@ class _WeatherPageState extends State<WeatherPage> {
         setState(() {
           weatherData = jsonDecode(response.body);
           isLoading = false;
+          hasError = false;  // Clear any previous errors
         });
       } else {
-        print('Failed to load weather data');
+        setState(() {
+          isLoading = false;
+          hasError = true;  // Set error state if status code is not 200
+        });
+        print('Failed to load weather data. Status code: ${response.statusCode}');
       }
     } catch (e) {
+      setState(() {
+        isLoading = false;
+        hasError = true;  // Set error state if an exception occurs
+      });
       print('Error fetching weather data: $e');
     }
   }
@@ -125,7 +135,9 @@ class _WeatherPageState extends State<WeatherPage> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())  // Display loading spinner while fetching data
-          : buildWeatherInfo(),  // Display weather information once data is fetched
+          : hasError
+              ? const Center(child: Text('Failed to load weather data.'))  // Display error message on failure
+              : buildWeatherInfo(),  // Display weather information once data is fetched
     );
   }
 }
