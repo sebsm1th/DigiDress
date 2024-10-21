@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'bottomnav.dart';
+import 'weatherpage.dart';
 
 class WardrobePage extends StatefulWidget {
   const WardrobePage({super.key});
@@ -40,6 +41,18 @@ class _WardrobePageState extends State<WardrobePage> {
       ),
       body: Column(
         children: [
+
+          // Button to navigate to WeatherPage
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const WeatherPage()),  // Navigate to WeatherPage
+              );
+            },
+            child: const Text('Weather'),  // "Weather" button
+          ),
+
           // Search Bar
           Padding(
             padding: const EdgeInsets.all(8.0),
