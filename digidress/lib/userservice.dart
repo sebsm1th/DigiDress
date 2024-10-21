@@ -20,6 +20,12 @@ class UserService {
       'status': 'pending',    // Status of the request (pending, accepted, etc.)
       'timestamp': FieldValue.serverTimestamp(),  // Timestamp for the request
     });
+
+    // Optionally, you could notify the recipient by updating their Firestore doc
+    await FirebaseFirestore.instance.collection('users').doc(friendID).update({
+      'newFriendRequests': true,  // Mark that a new friend request has been sent
+      'hasNewActivity': true,     // Mark that there is new activity for notifications
+    });
   }
 
   // Function to check if a friend request already exists
@@ -35,30 +41,30 @@ class UserService {
   }
 
   Future<void> addFriend(String currentUserID, String friendID) async {
-  // Fetch the friend's username
-  DocumentSnapshot friendDoc = await FirebaseFirestore.instance.collection('users').doc(friendID).get();
-  String friendUsername = friendDoc['username'] ?? 'Unknown';  // Default to 'Unknown' if username is not found
+    // Fetch the friend's username
+    DocumentSnapshot friendDoc = await FirebaseFirestore.instance.collection('users').doc(friendID).get();
+    String friendUsername = friendDoc['username'] ?? 'Unknown';  // Default to 'Unknown' if username is not found
 
-  // Fetch the current user's username
-  DocumentSnapshot currentUserDoc = await FirebaseFirestore.instance.collection('users').doc(currentUserID).get();
-  String currentUserUsername = currentUserDoc['username'] ?? 'Unknown';  // Default to 'Unknown' if username is not found
+    // Fetch the current user's username
+    DocumentSnapshot currentUserDoc = await FirebaseFirestore.instance.collection('users').doc(currentUserID).get();
+    String currentUserUsername = currentUserDoc['username'] ?? 'Unknown';  // Default to 'Unknown' if username is not found
 
-  // Add friend to current user's friends list
-  await FirebaseFirestore.instance.collection('friends').doc(currentUserID).collection('userFriends').doc(friendID).set({
-    'userID': friendID,  // Add friend's user ID
-    'username': friendUsername,
-    'status': 'accepted',
-    'timestamp': FieldValue.serverTimestamp(),
-  });
+    // Add friend to current user's friends list
+    await FirebaseFirestore.instance.collection('friends').doc(currentUserID).collection('userFriends').doc(friendID).set({
+      'userID': friendID,  // Add friend's user ID
+      'username': friendUsername,
+      'status': 'accepted',
+      'timestamp': FieldValue.serverTimestamp(),
+    });
 
-  // Add current user to friend's friends list
-  await FirebaseFirestore.instance.collection('friends').doc(friendID).collection('userFriends').doc(currentUserID).set({
-    'userID': currentUserID,  // Add current user's ID
-    'username': currentUserUsername,
-    'status': 'accepted',
-    'timestamp': FieldValue.serverTimestamp(),
-  });
-}
+    // Add current user to friend's friends list
+    await FirebaseFirestore.instance.collection('friends').doc(friendID).collection('userFriends').doc(currentUserID).set({
+      'userID': currentUserID,  // Add current user's ID
+      'username': currentUserUsername,
+      'status': 'accepted',
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
 
   // Function to check if two users are friends
   Future<bool> isAlreadyFriends(String currentUserID, String targetUserID) async {
@@ -130,37 +136,34 @@ class UserService {
   }
 
   // Function to update the username in all userFriends subcollections
-Future<void> updateUsernameInFriendsLists(String userID, String newUsername) async {
-  try {
-    // Fetch all users from the 'friends' collection
-    QuerySnapshot usersWithFriends = await FirebaseFirestore.instance.collection('friends').get();
+  Future<void> updateUsernameInFriendsLists(String userID, String newUsername) async {
+    try {
+      // Fetch all users from the 'friends' collection
+      QuerySnapshot usersWithFriends = await FirebaseFirestore.instance.collection('friends').get();
 
-    // Iterate through each user document
-    for (var userDoc in usersWithFriends.docs) {
-      // Access the userFriends subcollection of each user
-      QuerySnapshot userFriends = await FirebaseFirestore.instance
-          .collection('friends')
-          .doc(userDoc.id)
-          .collection('userFriends')
-          .where('userID', isEqualTo: userID)  // Find where the user appears in userFriends
-          .get();
-
-      // Iterate through userFriends to update the username where found
-      for (var friendDoc in userFriends.docs) {
-        await FirebaseFirestore.instance
+      // Iterate through each user document
+      for (var userDoc in usersWithFriends.docs) {
+        // Access the userFriends subcollection of each user
+        QuerySnapshot userFriends = await FirebaseFirestore.instance
             .collection('friends')
             .doc(userDoc.id)
             .collection('userFriends')
-            .doc(friendDoc.id)
-            .update({'username': newUsername});
+            .where('userID', isEqualTo: userID)  // Find where the user appears in userFriends
+            .get();
+
+        // Iterate through userFriends to update the username where found
+        for (var friendDoc in userFriends.docs) {
+          await FirebaseFirestore.instance
+              .collection('friends')
+              .doc(userDoc.id)
+              .collection('userFriends')
+              .doc(friendDoc.id)
+              .update({'username': newUsername});
+        }
       }
+      print('Username updated in all friends lists.');
+    } catch (e) {
+      print('Error updating username in friends lists: $e');
     }
-    print('Username updated in all friends lists.');
-  } catch (e) {
-    print('Error updating username in friends lists: $e');
   }
-}
-
-
-
 }
