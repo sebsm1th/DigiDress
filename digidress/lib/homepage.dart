@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'bottomnav.dart';
-import 'activity.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
+import 'bottomnav.dart';
+import 'activity.dart';
 import 'userservice.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,13 +20,19 @@ class _HomePageState extends State<HomePage> {
   bool isLoading = true;
   List<DocumentSnapshot> friendPosts = []; // Store posts from friends
   bool _hasFetchedFriends = false;
+  bool hasNewActivity = false; // To track if there is new activity
+  String? currentUserId;
+
+  bool newLikesActivity = false;
+  bool newCommentsActivity = false;
+  bool newFriendRequestsActivity = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeData();
-    });
+    currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    _initializeData();
+    _listenForNewActivity(); // Start listening for new activity
   }
 
   Future<void> _initializeData() async {
@@ -44,7 +50,8 @@ class _HomePageState extends State<HomePage> {
       String uid = FirebaseAuth.instance.currentUser?.uid ?? '';
       if (uid.isEmpty) return;
 
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      DocumentSnapshot userDoc =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
       if (userDoc.exists) {
         setState(() {
           username = userDoc['username'];
@@ -66,13 +73,15 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         isLoading = true;
       });
-      
+
       String uid = FirebaseAuth.instance.currentUser?.uid ?? '';
       if (uid.isEmpty) return;
 
-      List<DocumentSnapshot> friendsDocs = await UserService().getFriendsList(uid);
+      List<DocumentSnapshot> friendsDocs =
+          await UserService().getFriendsList(uid);
       setState(() {
-        friendsUserIds = friendsDocs.map((doc) => doc['userID'] as String).toList();
+        friendsUserIds =
+            friendsDocs.map((doc) => doc['userID'] as String).toList();
         _hasFetchedFriends = true;
       });
     } catch (e) {
@@ -91,7 +100,7 @@ class _HomePageState extends State<HomePage> {
       var postsSnapshot = await FirebaseFirestore.instance
           .collection('posts')
           .where('userId', isEqualTo: friendId)
-          .where('isArchived', isEqualTo: false) 
+          .where('isArchived', isEqualTo: false)
           .get();
 
       // Add the fetched posts to the friendPosts list
@@ -100,42 +109,97 @@ class _HomePageState extends State<HomePage> {
     setState(() {}); // Update the UI after fetching posts
   }
 
+  // Listening for new activity from Firestore
+  void _listenForNewActivity() {
+    if (currentUserId != null) {
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUserId)
+          .snapshots()
+          .listen((doc) {
+        if (doc.exists) {
+          setState(() {
+            hasNewActivity = doc.data()?['hasNewActivity'] ?? false;
+            newLikesActivity = doc.data()?['newLikes']?.isNotEmpty ?? false;
+            newCommentsActivity =
+                doc.data()?['newComments']?.isNotEmpty ?? false;
+            newFriendRequestsActivity =
+                doc.data()?['newFriendRequests'] ?? false;
+          });
+        }
+      });
+    }
+  }
+
+  // Clear the notification when the user checks ActivityPage
+  void _clearNewActivity() async {
+    if (currentUserId != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUserId)
+          .update({
+        'hasNewActivity': false,
+        'newLikes': [],
+        'newComments': [],
+        'newFriendRequests': false,
+      });
+      setState(() {
+        hasNewActivity = false;
+        newLikesActivity = false;
+        newCommentsActivity = false;
+        newFriendRequestsActivity = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        backgroundColor: Color(0xFFFFFDF5),
-        elevation: 0,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/logo1.png',
-              height: 80,
-              width: 80,
-              fit: BoxFit.contain,
-            ),
-          ],
-        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications, color: Colors.black),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ActivityPage()),
-              );
-            },
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications, color: Colors.black),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ActivityPage(
+                        newLikesActivity: newLikesActivity,
+                        newCommentsActivity: newCommentsActivity,
+                        newFriendRequestsActivity: newFriendRequestsActivity,
+                      ),
+                    ),
+                  ).then((_) =>
+                      _clearNewActivity()); // Clear notification when user views ActivityPage
+                },
+              ),
+              if (hasNewActivity)
+                Positioned(
+                  right: 11,
+                  top: 11,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 8,
+                      minHeight: 8,
+                    ),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(width: 10),
         ],
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : friendPosts.isEmpty
-              ? Center(
+              ? const Center(
                   child: Text(
                     'No posts available',
                     style: TextStyle(fontSize: 18, color: Colors.grey),
@@ -155,16 +219,23 @@ class _HomePageState extends State<HomePage> {
                     var ownerId = postData?['userId'] as String? ?? '';
 
                     return FutureBuilder<DocumentSnapshot>(
-                      future: FirebaseFirestore.instance.collection('users').doc(ownerId).get(),
+                      future: FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(ownerId)
+                          .get(),
                       builder: (context, ownerSnapshot) {
                         if (!ownerSnapshot.hasData) {
-                          return Center(child: CircularProgressIndicator());
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
 
-                        var ownerData = ownerSnapshot.data!.data() as Map<String, dynamic>?;
+                        var ownerData =
+                            ownerSnapshot.data!.data() as Map<String, dynamic>?;
 
-                        var ownerUsername = ownerData?['username'] as String? ?? 'Unknown';
-                        var ownerProfilePicture = ownerData?['profileImageUrl'] as String? ?? '';
+                        var ownerUsername =
+                            ownerData?['username'] as String? ?? 'Unknown';
+                        var ownerProfilePicture =
+                            ownerData?['profileImageUrl'] as String? ?? '';
 
                         return _buildPostItem(
                           postId,
@@ -184,130 +255,141 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-// Replace your existing _buildPostItem function with this updated version
-Widget _buildPostItem(String postId, String imageUrl, List<String> likes, String ownerUsername, String ownerProfilePicture) {
-  String userId = FirebaseAuth.instance.currentUser!.uid;
+  Widget _buildPostItem(String postId, String imageUrl, List<String> likes,
+      String ownerUsername, String ownerProfilePicture) {
+    String userId = FirebaseAuth.instance.currentUser!.uid;
 
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: SizedBox(
-      width: double.infinity,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundImage: ownerProfilePicture.isNotEmpty
-                    ? NetworkImage(ownerProfilePicture)
-                    : const AssetImage('assets/defaultProfilePicture.png'),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 25,
+                  backgroundImage: ownerProfilePicture.isNotEmpty
+                      ? NetworkImage(ownerProfilePicture)
+                      : const AssetImage('assets/defaultProfilePicture.png'),
+                ),
+                const SizedBox(width: 10),
+                Text(ownerUsername,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Image.network(imageUrl, width: double.infinity, fit: BoxFit.cover),
+            StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('posts')
+                  .doc(postId)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                var postData = snapshot.data!.data() as Map<String, dynamic>?;
+                var updatedLikes = (postData?['likes'] as List<dynamic>? ?? [])
+                    .map((e) => e as String)
+                    .toList();
+                bool isLiked = updatedLikes.contains(userId);
+
+                return Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                          isLiked ? Icons.favorite : Icons.favorite_border,
+                          color: isLiked ? Colors.red : null),
+                      onPressed: () => _toggleLike(postId, updatedLikes),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.comment),
+                      onPressed: () => _showCommentDialog(context, postId),
+                    ),
+                  ],
+                );
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('posts')
+                    .doc(postId)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text('No likes yet.'),
+                    );
+                  }
+                  var postData = snapshot.data!.data() as Map<String, dynamic>?;
+                  var updatedLikesCount =
+                      (postData?['likes'] as List<dynamic>? ?? []).length;
+
+                  return Text('$updatedLikesCount likes');
+                },
               ),
-              const SizedBox(width: 10),
-              Text(ownerUsername, style: const TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Image.network(imageUrl, width: double.infinity, fit: BoxFit.cover),
-          // StreamBuilder for likes
-          StreamBuilder<DocumentSnapshot>(
-            stream: FirebaseFirestore.instance.collection('posts').doc(postId).snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(child: CircularProgressIndicator());
-              }
-
-              var postData = snapshot.data!.data() as Map<String, dynamic>?;
-              var updatedLikes = (postData?['likes'] as List<dynamic>? ?? []).map((e) => e as String).toList();
-              bool isLiked = updatedLikes.contains(userId);
-
-              return Row(
-                children: [
-                  IconButton(
-                    icon: Icon(isLiked ? Icons.favorite : Icons.favorite_border, color: isLiked ? Colors.red : null),
-                    onPressed: () => _toggleLike(postId, updatedLikes),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.comment),
-                    onPressed: () => _showCommentDialog(context, postId),
-                  ),
-                ],
-              );
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: StreamBuilder<DocumentSnapshot>(
-              stream: FirebaseFirestore.instance.collection('posts').doc(postId).snapshots(),
+            ),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('posts')
+                  .doc(postId)
+                  .collection('comments')
+                  .orderBy('timestamp', descending: true)
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('No likes yet.'),
-                );
+                    child: Text('No comments yet.'),
+                  );
                 }
-                var postData = snapshot.data!.data() as Map<String, dynamic>?;
-                var updatedLikesCount = (postData?['likes'] as List<dynamic>? ?? []).length;
 
-                return Text('$updatedLikesCount likes');
+                var comments = snapshot.data!.docs.map((doc) {
+                  return doc.data() as Map<String, dynamic>;
+                }).toList();
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (var comment in comments)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${comment['username'] ?? 'Unknown'}:',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  comment['comment'] ?? 'No comment provided',
+                                  style: TextStyle(color: Colors.grey[700]),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                );
               },
             ),
-          ),
-          StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('posts')
-                .doc(postId)
-                .collection('comments')
-                .orderBy('timestamp', descending: true)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text('No comments yet.'),
-                );
-              }
-
-              var comments = snapshot.data!.docs.map((doc) {
-                return doc.data() as Map<String, dynamic>;
-              }).toList();
-
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (var comment in comments)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${comment['username'] ?? 'Unknown'}:',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                comment['comment'] ?? 'No comment provided',
-                                style: TextStyle(color: Colors.grey[700]),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   void _showCommentDialog(BuildContext context, String postId) {
     TextEditingController commentController = TextEditingController();
@@ -319,7 +401,8 @@ Widget _buildPostItem(String postId, String imageUrl, List<String> likes, String
           title: const Text('Add a Comment'),
           content: TextField(
             controller: commentController,
-            decoration: const InputDecoration(hintText: 'Type your comment here...'),
+            decoration:
+                const InputDecoration(hintText: 'Type your comment here...'),
           ),
           actions: [
             TextButton(
@@ -345,28 +428,78 @@ Widget _buildPostItem(String postId, String imageUrl, List<String> likes, String
 
   Future<void> _addComment(String postId, String comment) async {
     String userId = FirebaseAuth.instance.currentUser!.uid;
-    String username = this.username; // Use the fetched username
+    String username = this.username;
 
-    await FirebaseFirestore.instance.collection('posts').doc(postId).collection('comments').add({
+    await FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
+        .add({
       'comment': comment,
       'timestamp': FieldValue.serverTimestamp(),
       'userId': userId,
       'username': username,
     });
+
+    var postOwnerId =
+        (await FirebaseFirestore.instance.collection('posts').doc(postId).get())
+            .data()?['userId'];
+
+    if (postOwnerId != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(postOwnerId)
+          .update({
+        'newComments': FieldValue.arrayUnion([
+          {
+            'postId': postId,
+            'commentedBy': userId,
+            'comment': comment,
+          }
+        ]),
+        'hasNewActivity': true, // Mark new activity
+      });
+    }
   }
 
-  // Function to toggle like on a post
   void _toggleLike(String postId, List<dynamic> likes) async {
     String userId = FirebaseAuth.instance.currentUser!.uid;
     try {
       if (likes.contains(userId)) {
-        await FirebaseFirestore.instance.collection('posts').doc(postId).update({
+        await FirebaseFirestore.instance
+            .collection('posts')
+            .doc(postId)
+            .update({
           'likes': FieldValue.arrayRemove([userId])
         });
       } else {
-        await FirebaseFirestore.instance.collection('posts').doc(postId).update({
+        await FirebaseFirestore.instance
+            .collection('posts')
+            .doc(postId)
+            .update({
           'likes': FieldValue.arrayUnion([userId])
         });
+
+        // Notify post owner about new like
+        var postOwnerId = (await FirebaseFirestore.instance
+                .collection('posts')
+                .doc(postId)
+                .get())
+            .data()?['userId'];
+        if (postOwnerId != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(postOwnerId)
+              .update({
+            'newLikes': FieldValue.arrayUnion([
+              {
+                'postId': postId,
+                'likedBy': userId,
+              }
+            ]),
+            'hasNewActivity': true, // Mark new activity
+          });
+        }
       }
     } catch (e) {
       print('Error toggling like: $e');
