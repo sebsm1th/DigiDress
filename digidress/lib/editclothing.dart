@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'avatar.dart';
+import 'clothingitem.dart';
 
 class EditClothingPage extends StatefulWidget {
   final String imageUrl;
   final String clothingType;
   final String documentId;
+  
 
   const EditClothingPage({
     required this.imageUrl,
@@ -22,6 +25,7 @@ class _EditClothingPageState extends State<EditClothingPage> {
   late String _clothingType;
   late String _imageUrl;
   bool _isLoading = false;
+  final List<ClothingItem> _clothingItems = [];
 
   @override
   void initState() {
@@ -30,7 +34,6 @@ class _EditClothingPageState extends State<EditClothingPage> {
     _imageUrl = widget.imageUrl;
   }
 
-  
 
   Future<void> _updateClothingItem() async {
     setState(() {
@@ -83,6 +86,91 @@ class _EditClothingPageState extends State<EditClothingPage> {
     }
   }
 
+  void _tryOnClothing() {
+    ClothingType clothingTypeEnum;
+    switch (_clothingType) {
+      case 'Top':
+        clothingTypeEnum = ClothingType.top;
+        break;
+      case 'Dress':
+        clothingTypeEnum = ClothingType.dress;
+        break;
+      case 'Pants':
+        clothingTypeEnum = ClothingType.pants;
+        break;
+      case 'Outerwear':
+        clothingTypeEnum = ClothingType.outerwear;
+        break;
+      case 'Shoes':
+        clothingTypeEnum = ClothingType.shoes;
+        break;
+      case 'Accessories':
+        clothingTypeEnum = ClothingType.accessories;
+        break;
+      default:
+        clothingTypeEnum = ClothingType.top; // Default value or handle error
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AvatarPage(
+          imageUrl: _imageUrl,
+          clothingType: clothingTypeEnum, // Pass the enum value
+        ),
+      ),
+    );
+  }
+
+  // // In EditClothingPage, when the user presses "Try On":
+  // void _tryOnClothingItem() {
+  //   // Create the ClothingItem object with the current details.
+  //   ClothingType clothingTypeEnum;
+  //   switch (_clothingType) {
+  //     case 'Top':
+  //       clothingTypeEnum = ClothingType.top;
+  //       break;
+  //     case 'Dress':
+  //       clothingTypeEnum = ClothingType.dress;
+  //       break;
+  //     case 'Pants':
+  //       clothingTypeEnum = ClothingType.pants;
+  //       break;
+  //     case 'Outerwear':
+  //       clothingTypeEnum = ClothingType.outerwear;
+  //       break;
+  //     case 'Shoes':
+  //       clothingTypeEnum = ClothingType.shoes;
+  //       break;
+  //     case 'Accessories':
+  //       clothingTypeEnum = ClothingType.accessories;
+  //       break;
+  //     default:
+  //       clothingTypeEnum = ClothingType.top; // Default value or handle error
+  //   }
+  //   final clothingItem = ClothingItem(
+  //     imageUrl: _imageUrl,
+  //     scale: 1.0, // Default or user-adjusted value.
+  //     rotation: 0.0, // Default or user-adjusted value.
+  //     type: clothingTypeEnum,
+  //   );
+
+  //   // Add the clothing item to the shared array.
+  //   _clothingItems.add(clothingItem);
+
+  //   // Navigate to the AvatarPage with the clothing items array.
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => AvatarPage(clothingItems: _clothingItems),
+  //     ),
+  //   );
+  // }
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -133,6 +221,11 @@ class _EditClothingPageState extends State<EditClothingPage> {
                   ElevatedButton(
                     onPressed: _updateClothingItem,
                     child: const Text('Save Changes'),
+                  ),
+                const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _tryOnClothing,
+                    child: const Text('Try On'),
                   ),
                 ],
               ),
