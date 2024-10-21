@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'bottomnav.dart';
+import 'backgroundremover.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'editclothing.dart';
 
 class WardrobePage extends StatefulWidget {
   const WardrobePage({super.key});
@@ -10,6 +15,43 @@ class WardrobePage extends StatefulWidget {
 
 class _WardrobePageState extends State<WardrobePage> {
   int _currentIndex = 1; // Set the default index to Wardrobe tab
+  List<Map<String, dynamic>> _clothingItems = [];
+  
+  @override
+  void initState() {
+    super.initState();
+    _fetchClothingItems();
+  }
+
+  Future<void> _fetchClothingItems() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
+
+  print('Current user ID: ${user.uid}'); // Debugging line
+
+  try {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('wardrobe')
+        .where('userId', isEqualTo: user.uid)
+        .orderBy('createdAt', descending: true)
+        .get();
+
+    setState(() {
+      _clothingItems = querySnapshot.docs.map((doc) {
+        print('Fetched item: ${doc.data()}'); // Debugging line
+        return {
+          'documentId': doc.id, // Include the document ID here
+          ...doc.data(), // Spread the rest of the data fields
+        };
+      }).toList();
+    });
+  } catch (e) {
+    print('Error fetching clothing items: $e');
+  }
+}
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +76,10 @@ class _WardrobePageState extends State<WardrobePage> {
             icon: const Icon(Icons.add),
             onPressed: () {
               // Action to add new clothing item
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const BackgroundRemover()),
+              );
             },
           ),
         ],
@@ -77,45 +123,58 @@ class _WardrobePageState extends State<WardrobePage> {
           ),
           
           // GridView for Clothing Items
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(8.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 8.0,
-              ),
-              itemCount: 12, // Replace with the number of clothing items
-              itemBuilder: (context, index) {
-                return Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Center(
-                        child: Icon(Icons.image, size: 40), // Placeholder icon for the clothing image
-                      ),
-                    ),
-                    Positioned(
-                      top: 4,
-                      right: 4,
-                      child: IconButton(
-                        icon: const Icon(Icons.edit, size: 16),
-                        onPressed: () {
-                          // Edit clothing item
-                        },
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-
+        Expanded(
+          child: _clothingItems.isEmpty
+              ? const Center(child: Text('No clothing items found.'))
+              : GridView.builder(
+                  padding: const EdgeInsets.all(8.0),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 8.0,
+                    mainAxisSpacing: 8.0,
+                  ),
+                  itemCount: _clothingItems.length,
+                  itemBuilder: (context, index) {
+                    final item = _clothingItems[index];
+                    return Stack(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(8),
+                            image: DecorationImage(
+                              image: NetworkImage(item['imageUrl']),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: IconButton(
+                            icon: const Icon(Icons.edit, size: 16),
+                            onPressed: () {
+                              // Edit clothing item
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditClothingPage(
+                                    imageUrl: item['imageUrl'],
+                                    clothingType: item['clothingType'],
+                                    documentId: item['documentId'], // Make sure to include the documentId in your data map
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+        ),
+      ],
+    ),
       // Bottom Navigation Bar
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
