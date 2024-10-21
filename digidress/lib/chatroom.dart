@@ -371,8 +371,42 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       setState(() {
         _selectedImage = File(pickedFile.path);
       });
-      _uploadImage();
+
+      // Show preview dialog
+      _showImagePreviewDialog();
     }
+  }
+
+  // Show image preview before sending
+  Future<void> _showImagePreviewDialog() async {
+    if (_selectedImage == null) return;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Send this image?'),
+          content: _selectedImage != null
+              ? Image.file(_selectedImage!, height: 200) // Display the selected image
+              : const SizedBox(),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog (Cancel)
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog (Send)
+                _uploadImage(); // Upload and send the image
+              },
+              child: const Text('Send'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Function to upload the selected image to Firebase Storage
@@ -446,7 +480,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                     final senderId = message['senderId'];
 
                     // Determine if the message was sent by the current user
-                    final isMe = senderId == _userId; 
+                    final isMe = senderId == _userId;
 
                     return Align(
                       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
