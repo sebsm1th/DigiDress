@@ -1,3 +1,4 @@
+import 'package:digidress/friendsprofilepage.dart';
 import 'package:flutter/material.dart';
 import 'bottomnav.dart';
 import 'activity.dart';
@@ -172,6 +173,7 @@ class _HomePageState extends State<HomePage> {
                           likes,
                           ownerUsername,
                           ownerProfilePicture,
+                          ownerId, // Pass ownerId here
                         );
                       },
                     );
@@ -184,130 +186,143 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-// Replace your existing _buildPostItem function with this updated version
-Widget _buildPostItem(String postId, String imageUrl, List<String> likes, String ownerUsername, String ownerProfilePicture) {
-  String userId = FirebaseAuth.instance.currentUser!.uid;
+  // Updated _buildPostItem function with clickable usernames
+  Widget _buildPostItem(String postId, String imageUrl, List<String> likes, String ownerUsername, String ownerProfilePicture, String ownerId) {
+    String userId = FirebaseAuth.instance.currentUser!.uid;
 
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: SizedBox(
-      width: double.infinity,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundImage: ownerProfilePicture.isNotEmpty
-                    ? NetworkImage(ownerProfilePicture)
-                    : const AssetImage('assets/defaultProfilePicture.png'),
-              ),
-              const SizedBox(width: 10),
-              Text(ownerUsername, style: const TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Image.network(imageUrl, width: double.infinity, fit: BoxFit.cover),
-          // StreamBuilder for likes
-          StreamBuilder<DocumentSnapshot>(
-            stream: FirebaseFirestore.instance.collection('posts').doc(postId).snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(child: CircularProgressIndicator());
-              }
-
-              var postData = snapshot.data!.data() as Map<String, dynamic>?;
-              var updatedLikes = (postData?['likes'] as List<dynamic>? ?? []).map((e) => e as String).toList();
-              bool isLiked = updatedLikes.contains(userId);
-
-              return Row(
-                children: [
-                  IconButton(
-                    icon: Icon(isLiked ? Icons.favorite : Icons.favorite_border, color: isLiked ? Colors.red : null),
-                    onPressed: () => _toggleLike(postId, updatedLikes),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 25,
+                  backgroundImage: ownerProfilePicture.isNotEmpty
+                      ? NetworkImage(ownerProfilePicture)
+                      : const AssetImage('assets/defaultProfilePicture.png') as ImageProvider,
+                ),
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: () {
+                    // Navigate to FriendProfilePage when username is tapped
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FriendProfilePage(userID: ownerId),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    ownerUsername,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.comment),
-                    onPressed: () => _showCommentDialog(context, postId),
-                  ),
-                ],
-              );
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: StreamBuilder<DocumentSnapshot>(
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Image.network(imageUrl, width: double.infinity, fit: BoxFit.cover),
+            // StreamBuilder for likes
+            StreamBuilder<DocumentSnapshot>(
               stream: FirebaseFirestore.instance.collection('posts').doc(postId).snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                var postData = snapshot.data!.data() as Map<String, dynamic>?;
+                var updatedLikes = (postData?['likes'] as List<dynamic>? ?? []).map((e) => e as String).toList();
+                bool isLiked = updatedLikes.contains(userId);
+
+                return Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(isLiked ? Icons.favorite : Icons.favorite_border, color: isLiked ? Colors.red : null),
+                      onPressed: () => _toggleLike(postId, updatedLikes),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.comment),
+                      onPressed: () => _showCommentDialog(context, postId),
+                    ),
+                  ],
+                );
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance.collection('posts').doc(postId).snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text('No likes yet.'),
+                  );
+                  }
+                  var postData = snapshot.data!.data() as Map<String, dynamic>?;
+                  var updatedLikesCount = (postData?['likes'] as List<dynamic>? ?? []).length;
+
+                  return Text('$updatedLikesCount likes');
+                },
+              ),
+            ),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('posts')
+                  .doc(postId)
+                  .collection('comments')
+                  .orderBy('timestamp', descending: true)
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('No likes yet.'),
-                );
+                    child: Text('No comments yet.'),
+                  );
                 }
-                var postData = snapshot.data!.data() as Map<String, dynamic>?;
-                var updatedLikesCount = (postData?['likes'] as List<dynamic>? ?? []).length;
 
-                return Text('$updatedLikesCount likes');
+                var comments = snapshot.data!.docs.map((doc) {
+                  return doc.data() as Map<String, dynamic>;
+                }).toList();
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (var comment in comments)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${comment['username'] ?? 'Unknown'}:',
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  comment['comment'] ?? 'No comment provided',
+                                  style: TextStyle(color: Colors.grey[700]),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                );
               },
             ),
-          ),
-          StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('posts')
-                .doc(postId)
-                .collection('comments')
-                .orderBy('timestamp', descending: true)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text('No comments yet.'),
-                );
-              }
-
-              var comments = snapshot.data!.docs.map((doc) {
-                return doc.data() as Map<String, dynamic>;
-              }).toList();
-
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (var comment in comments)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${comment['username'] ?? 'Unknown'}:',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                comment['comment'] ?? 'No comment provided',
-                                style: TextStyle(color: Colors.grey[700]),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   void _showCommentDialog(BuildContext context, String postId) {
     TextEditingController commentController = TextEditingController();
