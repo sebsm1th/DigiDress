@@ -157,7 +157,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'), // Add a title if desired
+        automaticallyImplyLeading: false,
+        title: Text('Home'),
         actions: [
           Stack(
             children: [

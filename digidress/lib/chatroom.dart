@@ -435,6 +435,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFDF5),
+        automaticallyImplyLeading: false,
         title: Row(
           children: [
             CircleAvatar(
