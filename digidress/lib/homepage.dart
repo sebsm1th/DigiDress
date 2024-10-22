@@ -158,7 +158,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('Home'),
+        title: Text('Home'), // Add a title if desired
         actions: [
           Stack(
             children: [

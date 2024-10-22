@@ -3,11 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'homepage.dart';
 import 'createaccountpage.dart';
 
-final TextEditingController usernameController = TextEditingController();
-final TextEditingController passwordController = TextEditingController();
-
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final FirebaseAuth? auth;
+
+  const LoginPage({Key? key, this.auth}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -15,6 +14,17 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _obscureText = true; // Password visibility toggle
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Dispose of the controllers when the widget is disposed
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +42,13 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  'assets/logo1.png', 
-                  height: 250, 
+                  'assets/logo1.png',
+                  height: 250,
                 ),
                 const SizedBox(height: 30), // Add spacing between logo and text fields
                 TextField(
-                  controller: usernameController,
+                  key: const Key('emailField'),
+                  controller: emailController,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.email),
@@ -46,6 +57,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 20), // Add spacing between text fields
                 TextField(
+                  key: const Key('passwordField'),
                   controller: passwordController,
                   obscureText: _obscureText, // Toggle password visibility
                   decoration: InputDecoration(
@@ -71,21 +83,36 @@ class _LoginPageState extends State<LoginPage> {
                     ElevatedButton(
                       onPressed: () async {
                         print('Login button pressed');
-                        String email = usernameController.text;
+                        String email = emailController.text.trim();
                         String password = passwordController.text;
 
+                        if (email.isEmpty || password.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please enter email and password'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+
                         try {
-                          UserCredential userCredential = await FirebaseAuth.instance
-                              .signInWithEmailAndPassword(
+                          UserCredential userCredential =
+                              await (widget.auth ?? FirebaseAuth.instance)
+                                  .signInWithEmailAndPassword(
                             email: email,
                             password: password,
                           );
                           if (context.mounted) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (context) => const HomePage()),
+                           Navigator.pushReplacement(
+                            context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomePage(),
+                              ),
                             );
                           }
+
+
                         } on FirebaseAuthException catch (e) {
                           String errorMessage;
                           if (e.code == 'user-not-found') {
@@ -118,7 +145,8 @@ class _LoginPageState extends State<LoginPage> {
                         print('Create Account button pressed');
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => CreateAccountPage()),
+                          MaterialPageRoute(
+                              builder: (context) => CreateAccountPage()),
                         );
                       },
                       child: const Text('Create Account'),

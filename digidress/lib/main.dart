@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'login_page.dart';
 import 'clothingmanager.dart'; // Import ClothingManager
-import 'avatar.dart'; // Import AvatarPage
 import 'package:provider/provider.dart';
 
 
