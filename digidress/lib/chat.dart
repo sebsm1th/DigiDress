@@ -70,7 +70,7 @@ class _ChatPageState extends State<ChatPage> {
                   itemCount: _friends.length,
                   itemBuilder: (context, index) {
                     final friend = _friends[index];
-                    final friendData = friend.data() as Map<String, dynamic>;
+                    //final friendData = friend.data() as Map<String, dynamic>;
 
                     // Fetch profile data from the users collection
                     return FutureBuilder<DocumentSnapshot>(
