@@ -1,3 +1,4 @@
+import 'package:digidress/friendsprofilepage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
@@ -156,6 +157,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: Text('Home'), // Add a title if desired
         actions: [
           Stack(
             children: [
@@ -243,6 +245,7 @@ class _HomePageState extends State<HomePage> {
                           likes,
                           ownerUsername,
                           ownerProfilePicture,
+                          ownerId, // Pass ownerId here
                         );
                       },
                     );
@@ -255,8 +258,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildPostItem(String postId, String imageUrl, List<String> likes,
-      String ownerUsername, String ownerProfilePicture) {
+  // Updated _buildPostItem function with clickable usernames
+  Widget _buildPostItem(
+    String postId,
+    String imageUrl,
+    List<String> likes,
+    String ownerUsername,
+    String ownerProfilePicture,
+    String ownerId,
+  ) {
     String userId = FirebaseAuth.instance.currentUser!.uid;
 
     return Padding(
@@ -272,15 +282,30 @@ class _HomePageState extends State<HomePage> {
                   radius: 25,
                   backgroundImage: ownerProfilePicture.isNotEmpty
                       ? NetworkImage(ownerProfilePicture)
-                      : const AssetImage('assets/defaultProfilePicture.png'),
+                      : const AssetImage('assets/defaultProfilePicture.png')
+                          as ImageProvider,
                 ),
                 const SizedBox(width: 10),
-                Text(ownerUsername,
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                GestureDetector(
+                  onTap: () {
+                    // Navigate to FriendProfilePage when username is tapped
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FriendProfilePage(userID: ownerId),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    ownerUsername,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 10),
             Image.network(imageUrl, width: double.infinity, fit: BoxFit.cover),
+            // StreamBuilder for likes
             StreamBuilder<DocumentSnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('posts')
@@ -301,8 +326,9 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     IconButton(
                       icon: Icon(
-                          isLiked ? Icons.favorite : Icons.favorite_border,
-                          color: isLiked ? Colors.red : null),
+                        isLiked ? Icons.favorite : Icons.favorite_border,
+                        color: isLiked ? Colors.red : null,
+                      ),
                       onPressed: () => _toggleLike(postId, updatedLikes),
                     ),
                     IconButton(

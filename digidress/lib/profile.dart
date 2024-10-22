@@ -1,3 +1,4 @@
+import 'package:digidress/friendsprofilepage.dart';
 import 'package:digidress/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -496,6 +497,15 @@ class FriendsListPage extends StatelessWidget {
 
                   return ListTile(
                     title: Text(friendName),
+                    onTap: () {
+                      // Navigate to the friend's profile page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FriendProfilePage(userID: friendId),
+                        ),
+                      );
+                    },
                   );
                 },
               );
@@ -506,3 +516,4 @@ class FriendsListPage extends StatelessWidget {
     );
   }
 }
+
