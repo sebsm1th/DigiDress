@@ -153,111 +153,119 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text('Home'), // Add a title if desired
-        actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.notifications, color: Colors.black),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ActivityPage(
-                        newLikesActivity: newLikesActivity,
-                        newCommentsActivity: newCommentsActivity,
-                        newFriendRequestsActivity: newFriendRequestsActivity,
-                      ),
-                    ),
-                  ).then((_) =>
-                      _clearNewActivity()); // Clear notification when user views ActivityPage
-                },
-              ),
-              if (hasNewActivity)
-                Positioned(
-                  right: 11,
-                  top: 11,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 8,
-                      minHeight: 8,
-                    ),
-                  ),
-                ),
-            ],
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      backgroundColor: const Color(0xFFFFFDF5),
+      automaticallyImplyLeading: false,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/logo1.png',
+            height: 80,
+            width: 80,
+            fit: BoxFit.contain,
           ),
-          const SizedBox(width: 10),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : friendPosts.isEmpty
-              ? const Center(
-                  child: Text(
-                    'No posts available',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+      actions: [
+        Stack(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.notifications, color: Colors.black),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ActivityPage(
+                      newLikesActivity: newLikesActivity,
+                      newCommentsActivity: newCommentsActivity,
+                      newFriendRequestsActivity: newFriendRequestsActivity,
+                    ),
                   ),
-                )
-              : ListView.builder(
-                  itemCount: friendPosts.length,
-                  itemBuilder: (context, index) {
-                    var post = friendPosts[index];
-                    var postId = post.id;
-                    var postData = post.data() as Map<String, dynamic>?;
-
-                    var imageUrl = postData?['imageUrl'] as String? ?? '';
-                    var likes = (postData?['likes'] as List<dynamic>? ?? [])
-                        .map((e) => e as String)
-                        .toList();
-                    var ownerId = postData?['userId'] as String? ?? '';
-
-                    return FutureBuilder<DocumentSnapshot>(
-                      future: FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(ownerId)
-                          .get(),
-                      builder: (context, ownerSnapshot) {
-                        if (!ownerSnapshot.hasData) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-
-                        var ownerData =
-                            ownerSnapshot.data!.data() as Map<String, dynamic>?;
-
-                        var ownerUsername =
-                            ownerData?['username'] as String? ?? 'Unknown';
-                        var ownerProfilePicture =
-                            ownerData?['profileImageUrl'] as String? ?? '';
-
-                        return _buildPostItem(
-                          postId,
-                          imageUrl,
-                          likes,
-                          ownerUsername,
-                          ownerProfilePicture,
-                          ownerId, // Pass ownerId here
-                        );
-                      },
-                    );
-                  },
+                ).then((_) => _clearNewActivity()); // Clear notification when user views ActivityPage
+              },
+            ),
+            if (hasNewActivity)
+              Positioned(
+                right: 11,
+                top: 11,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 8,
+                    minHeight: 8,
+                  ),
                 ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-      ),
-    );
-  }
+              ),
+          ],
+        ),
+        const SizedBox(width: 10),
+      ],
+    ),
+    body: isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : friendPosts.isEmpty
+            ? const Center(
+                child: Text(
+                  'No posts available',
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                ),
+              )
+            : ListView.builder(
+                itemCount: friendPosts.length,
+                itemBuilder: (context, index) {
+                  var post = friendPosts[index];
+                  var postId = post.id;
+                  var postData = post.data() as Map<String, dynamic>?;
+
+                  var imageUrl = postData?['imageUrl'] as String? ?? '';
+                  var likes = (postData?['likes'] as List<dynamic>? ?? [])
+                      .map((e) => e as String)
+                      .toList();
+                  var ownerId = postData?['userId'] as String? ?? '';
+
+                  return FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(ownerId)
+                        .get(),
+                    builder: (context, ownerSnapshot) {
+                      if (!ownerSnapshot.hasData) {
+                        return const Center(
+                            child: CircularProgressIndicator());
+                      }
+
+                      var ownerData = ownerSnapshot.data!.data() as Map<String, dynamic>?;
+
+                      var ownerUsername = ownerData?['username'] as String? ?? 'Unknown';
+                      var ownerProfilePicture = ownerData?['profileImageUrl'] as String? ?? '';
+
+                      return _buildPostItem(
+                        postId,
+                        imageUrl,
+                        likes,
+                        ownerUsername,
+                        ownerProfilePicture,
+                        ownerId, // Pass ownerId here
+                      );
+                    },
+                  );
+                },
+              ),
+    bottomNavigationBar: BottomNavBar(
+      currentIndex: _currentIndex,
+      onTap: (index) => setState(() => _currentIndex = index),
+    ),
+  );
+}
+
 
   // Updated _buildPostItem function with clickable usernames
   Widget _buildPostItem(
