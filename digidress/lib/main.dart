@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'login_page.dart';
+import 'clothingmanager.dart'; // Import ClothingManager
+import 'avatar.dart'; // Import AvatarPage
+import 'package:provider/provider.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,7 +17,12 @@ void main() async {
   } catch (e) {
     print('Error initializing Firebase: $e');
   }
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ClothingManager(), // Provide ClothingManager
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

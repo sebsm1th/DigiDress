@@ -241,6 +241,41 @@ Future<void> _removeBackground(InputImage inputImage) async {
 
   // Store the processed image in Firebase Storage and Firestore
   // Store image method
+// Future<void> _storeImage(Uint8List processedImage, String clothingType) async {
+//   final user = FirebaseAuth.instance.currentUser;
+//   if (user == null) {
+//     _showError('User not authenticated. Please log in to save images.');
+//     return;
+//   }
+
+//   final storageRef = FirebaseStorage.instance.ref().child('wardrobe/${user.uid}/${DateTime.now().millisecondsSinceEpoch}.png');
+//   try {
+//     await storageRef.putData(processedImage);
+//     final imageUrl = await storageRef.getDownloadURL();
+
+//     // Save metadata to Firestore
+//     await FirebaseFirestore.instance.collection('wardrobe').add({
+//       'userId': user.uid,
+//       'imageUrl': imageUrl,
+//       'clothingType': clothingType,
+//       'createdAt': FieldValue.serverTimestamp(),
+//     });
+
+//     if (mounted) {
+//       _showSuccess('Image saved to wardrobe successfully!');
+//     }
+//   } catch (e) {
+//     _showError('Failed to store in database: $e');
+//   } finally {
+//     if (mounted) {
+//       setState(() {
+//         _isLoading = false;
+//       });
+//     }
+//   }
+// }
+
+// Store the processed image as a clothing item
 Future<void> _storeImage(Uint8List processedImage, String clothingType) async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) {
@@ -248,24 +283,31 @@ Future<void> _storeImage(Uint8List processedImage, String clothingType) async {
     return;
   }
 
-  final storageRef = FirebaseStorage.instance.ref().child('wardrobe/${user.uid}/${DateTime.now().millisecondsSinceEpoch}.png');
+  // Create a reference to store the image in Firebase Storage
+  final storageRef = FirebaseStorage.instance.ref().child(
+      'wardrobe/${user.uid}/${DateTime.now().millisecondsSinceEpoch}.png');
+  
   try {
+    // Upload the processed image to Firebase Storage
     await storageRef.putData(processedImage);
     final imageUrl = await storageRef.getDownloadURL();
 
-    // Save metadata to Firestore
-    await FirebaseFirestore.instance.collection('wardrobe').add({
+    // Create a new ClothingItem
+    final clothingItem = {
       'userId': user.uid,
       'imageUrl': imageUrl,
       'clothingType': clothingType,
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    };
+
+    // Save the clothing item to Firestore
+    await FirebaseFirestore.instance.collection('wardrobe').add(clothingItem);
 
     if (mounted) {
-      _showSuccess('Image saved to wardrobe successfully!');
+      _showSuccess('Clothing item saved successfully!');
     }
   } catch (e) {
-    _showError('Failed to store in database: $e');
+    _showError('Failed to store clothing item: $e');
   } finally {
     if (mounted) {
       setState(() {
@@ -274,6 +316,7 @@ Future<void> _storeImage(Uint8List processedImage, String clothingType) async {
     }
   }
 }
+
 
   // Show error message
   void _showError(String message) {
